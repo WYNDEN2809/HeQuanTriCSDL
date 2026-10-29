@@ -20,11 +20,11 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: scentstation/main.tex.
+          root_file: main.tex.
           args: "-pdf -file-line-error -interaction=nonstopmode"
 
       - name: Commit and Push compiled PDF
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-compile main.pdf via GitHub Actions"
-          file_pattern: scentstation/main.tex.
+          file_pattern: main.tex.
