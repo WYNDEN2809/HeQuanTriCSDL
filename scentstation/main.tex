@@ -1,0 +1,123 @@
+\documentclass[a4paper,12pt,leqno]{report}
+
+% Căn lề
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=3cm, right=2cm]{geometry}
+
+% Cấu hình tiếng việt và font chữ
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{mathptmx}
+
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{mathptmx}
+\usepackage{array,booktabs,longtable}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{xcolor,tabularx,listings}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem,indentfirst,titlesec,tocloft,float,graphicx,hyperref}
+
+% Định dạng tiêu đề chương
+\titleformat{\chapter}[block]
+  {\centering\bfseries\Large}
+  {CHƯƠNG \thechapter:}
+  {0.5em}
+  {\MakeUppercase}
+\titleformat{name=\chapter,numberless}[block]
+  {\centering\bfseries\Large}{}{0em}{\MakeUppercase}
+
+% Hiển thị số chương trong mục lục
+\renewcommand{\cftchappresnum}{Chương }
+\renewcommand{\cftchapaftersnum}{:\ }
+\setlength{\cftchapnumwidth}{3cm}
+
+\addto\captionsvietnamese{
+  \renewcommand{\chaptername}{Chương}
+  \renewcommand{\contentsname}{MỤC LỤC}
+  \renewcommand{\listfigurename}{DANH MỤC HÌNH}
+  \renewcommand{\listtablename}{DANH MỤC BẢNG}
+}
+
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Bao cao bai tap lon mon CSDL - nen tang iot da thương hieu cho may trai nghiem va quan ly nuoc hoa}
+}
+
+% Noi dung
+\begin{document}
+
+% Thiết kế trang bìa 
+\begin{titlepage}
+    \centering
+    \Large\textbf{TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI TP. HỒ CHÍ MINH}\\[0.2cm]
+    \large\textbf{KHOA CÔNG NGHỆ THÔNG TIN}\\[0.9cm]
+
+    \Huge\textbf{BÁO CÁO BÀI TẬP LỚN}\\[0.3cm]
+    \Large\textbf{MÔN: HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU}\\[0.2cm]
+    \large\textbf{Mã học phần: 012012100303}\\[0.8cm]
+
+    \rule{\linewidth}{1.5pt}\\[0.35cm]
+    \large\textbf{ĐỀ TÀI:}\\[0.35cm]
+    \normalsize\textbf{NỀN TẢNG IoT ĐA THƯƠNG HIỆU}\\
+    CHO MÁY TRẢI NGHIỆM VÀ QUẢN LÝ NƯỚC HOA}\\[0.35cm]
+    \rule{\linewidth}{1.5pt}\\[1.5cm]
+    
+    \vfill
+    \Large\textbf{TP. Hồ Chí Minh, Năm 2026}
+\end{titlepage}
+
+\cleardoublepage
+\pagenumbering{roman}
+
+% Mucj lục
+\tableofcontents
+\cleardoublepage
+
+\pagenumbering{arabic}
+
+% Phần đầu
+\addtocontents{toc}{\protect\vspace{1.5em}\protect\noindent{\bfseries\Large PHẦN ĐẦU}\par\protect\vspace{0.5em}}
+
+\input{loi_mo_dau}
+\cleardoublepage
+
+\input{loi_cam_on}
+\cleardoublepage
+
+% Phần nội dung chính
+\addtocontents{toc}{\protect\vspace{1.5em}\protect\noindent{\bfseries\Large NỘI DUNG CHÍNH}\par\protect\vspace{0.5em}}
+
+\input{chuong1}
+\cleardoublepage
+
+\input{chuong2}
+\cleardoublepage
+
+\input{chuong3}
+\cleardoublepage
+
+\input{chuong4}
+\cleardoublepage
+
+\input{chuong5}
+\cleardoublepage
+
+% Phần kết luận 
+\addtocontents{toc}{\protect\vspace{1.5em}\protect\noindent{\bfseries\Large PHẦN KẾT LUẬN}\par\protect\vspace{0.5em}}
+
+\input{ket_luan}
+\cleardoublepage
+
+% Tài liệu tham khảo
+\addtocontents{toc}{\protect\vspace{1.5em}\protect\noindent{\bfseries\Large TÀI LIỆU THAM KHẢO}\par\protect\vspace{0.5em}}
+
+\input{tai_lieu_tham_khao}
+\cleardoublepage
+
+\end{document}
