@@ -1,5 +1,6 @@
 \documentclass[a4paper,12pt,oneside]{report}
 \usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=2cm]{geometry}
+
 \usepackage[T5]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[vietnamese]{babel}
@@ -14,6 +15,7 @@
 \titleformat{name=\chapter,numberless}[block]{\centering\bfseries\Large}{}{0em}{\MakeUppercase}
 \titleformat{\section}{\bfseries\normalsize}{\thesection}{0.7em}{}
 \titleformat{\subsection}{\bfseries\normalsize}{\thesubsection}{0.7em}{}
+
 \renewcommand{\cftchappresnum}{Chương }
 \renewcommand{\cftchapaftersnum}{:\ }
 \setlength{\cftchapnumwidth}{3cm}
@@ -36,6 +38,7 @@ pdftitle={ScentStation - Bao cao do an},pdfauthor={Nhom thuc hien}}
 \vspace{1.4cm}
 {\large BÁO CÁO ĐỒ ÁN / BÀI TẬP LỚN\par}
 \vspace{0.8cm}
+
 {\Huge\bfseries SCENTSTATION\par}
 \vspace{0.5cm}
 {\Large NỀN TẢNG IoT ĐA THƯƠNG HIỆU\\
@@ -43,19 +46,34 @@ CHO MÁY TRẢI NGHIỆM VÀ QUẢN LÝ NƯỚC HOA\par}
 \vspace{0.5cm}
 {\large\itshape ScentStation: A Multi-Brand IoT Perfume Experience and Management Platform\par}
 \vspace{1.5cm}
-\begin{flushright}
-\begin{tabular}{rl}
-\textbf{Sinh viên/Nhóm thực hiện:} & [Điền họ tên] \\
-\textbf{Mã sinh viên:} & [Điền MSSV] \\
-\textbf{Lớp:} & [Điền lớp] \\
-\textbf{Giảng viên hướng dẫn:} & [Điền tên] \\
-\textbf{Học phần:} & [Điền học phần] \\
-\end{tabular}
-\end{flushright}
-\vfill
-{\large TP. Hồ Chí Minh, năm 2026\par}
-\end{titlepage}
 
+% danh sách sinh viên
+\vspace{1cm}
+
+\begin{center}
+\begin{tabular}{|c|c|}
+    \hline
+    \textbf{Họ và tên} & \textbf{Mã số sinh viên} \\
+    \hline
+    [Nguyễn Chánh Tư Duy] & [058306002848] \\
+    \hline
+    [Đặng Ngọc Thùy Dung] & [079306005262] \\
+    \hline
+    [Tôn Thiên Thanh] & [084306000518] \\
+    \hline
+    [Khang] & [MSSV] \\
+    \hline
+    [Hùng] & [MSSV] \\
+    \hline
+\end{tabular}
+\end{center}
+\vfill
+
+\begin{center}
+    {\large TP. Hồ Chí Minh, năm 2026\par}
+\end{center}
+
+\end{titlepage}
 \pagenumbering{roman}
 \input{scentstation/loi_mo_dau}
 \clearpage
@@ -63,6 +81,7 @@ CHO MÁY TRẢI NGHIỆM VÀ QUẢN LÝ NƯỚC HOA\par}
 \clearpage
 \tableofcontents
 \clearpage
+
 % Bo dau % neu can danh muc hinh/bang:
 % \listoffigures
 % \clearpage
