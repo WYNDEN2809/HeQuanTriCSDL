@@ -1,4 +1,3 @@
-
 name: Compile LaTeX to PDF
 
 on:
@@ -7,12 +6,12 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build_latex:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,11 +19,11 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: main.tex.
-          args: "-pdf -file-line-error -interaction=nonstopmode"
+          root_file: main.tex
+          args: -pdf -file-line-error -interaction=nonstopmode
 
-      - name: Commit and Push compiled PDF
+      - name: Commit and push compiled PDF
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-compile main.pdf via GitHub Actions"
-          file_pattern: main.tex.
+          file_pattern: main.pdf

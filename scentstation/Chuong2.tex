@@ -1,0 +1,58 @@
+\chapter{PHÂN TÍCH YÊU CẦU VÀ NGHIỆP VỤ}
+\section{Tổng quan nghiệp vụ}
+\subsection{Nghiệp vụ trải nghiệm nước hoa}
+% Khách xem mùi hương, chọn sản phẩm, xác nhận giá, thanh toán và nhận xịt.
+\subsection{Nghiệp vụ quản lý vận hành}
+% Quản lý thương hiệu, người dùng, máy, khe, tồn kho, cảnh báo, bảo trì.
+\section{Các tác nhân và vai trò}
+\subsection{Quản trị viên nền tảng (Platform Super Administrator)}
+\subsection{Quản trị viên thương hiệu (Brand Administrator)}
+\subsection{Quản lý vận hành (Operations Manager)}
+\subsection{Kỹ thuật viên (Technician)}
+\subsection{Nhân viên kho (Inventory Staff)}
+\subsection{Khách hàng (Customer/Kiosk User)}
+% Phân biệt vai trò trong đề xuất với vai trò thực tế của phiên bản triển khai.
+\section{Yêu cầu chức năng}
+\subsection{Quản lý thương hiệu, người dùng và phân quyền}
+\subsection{Quản lý máy và khe chứa}
+\subsection{Quản lý sản phẩm nước hoa}
+\subsection{Quản lý đơn hàng và thanh toán}
+\subsection{Quản lý cấp phát nước hoa}
+\subsection{Giám sát thiết bị và dữ liệu IoT}
+\subsection{Quản lý tồn kho và tiếp thêm nước hoa}
+\subsection{Quản lý cảnh báo và bảo trì}
+\subsection{Thống kê, báo cáo và nhật ký hệ thống}
+\section{Yêu cầu phi chức năng}
+\subsection{Hiệu năng}
+\subsection{Tính sẵn sàng}
+\subsection{Bảo mật}
+\subsection{Độ tin cậy và nhất quán}
+\subsection{Khả năng mở rộng}
+\subsection{Khả năng sử dụng và bảo trì}
+\section{Quy tắc nghiệp vụ}
+\begin{enumerate}
+\item Mỗi máy thuộc về một thương hiệu tại một thời điểm.
+\item Mỗi khe chỉ có một chai/hộp nước hoa đang hoạt động.
+\item Đơn hàng lưu giá tại thời điểm tạo.
+\item Chỉ backend xác nhận thanh toán thành công.
+\item Chỉ tạo lệnh cấp phát sau khi xác nhận thanh toán.
+\item Một đơn hàng không có nhiều hơn một lần xịt thành công.
+\item Không cấp phát khi máy bảo trì, khe rỗng hoặc có lỗi nghiêm trọng.
+\item Kết quả cấp phát không chắc chắn phải được đưa vào kiểm tra.
+\item Dữ liệu các thương hiệu phải được phân tách theo quyền.
+\end{enumerate}
+\section{Biểu đồ Use Case tổng quát}
+% TODO: Chèn hình use_case_tong_quat.png khi có.
+\section{Đặc tả Use Case tiêu biểu}
+\subsection{UC-01: Xem và chọn nước hoa}
+\subsection{UC-02: Tạo đơn trải nghiệm}
+\subsection{UC-03: Thanh toán đơn hàng}
+\subsection{UC-04: Cấp phát một lần xịt}
+\subsection{UC-05: Quản lý máy và khe chứa}
+\subsection{UC-06: Theo dõi tồn kho và cảnh báo}
+\section{Biểu đồ hoạt động}
+\subsection{Luồng thanh toán thành công}
+\subsection{Luồng thanh toán thất bại hoặc hết hạn}
+\subsection{Luồng khe chứa hết nước hoa}
+\subsection{Luồng thanh toán thành công nhưng cấp phát lỗi}
+\section{Tổng kết chương}
