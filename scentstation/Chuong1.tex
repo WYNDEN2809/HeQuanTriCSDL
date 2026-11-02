@@ -1,8 +1,23 @@
 \chapter{TỔNG QUAN ĐỀ TÀI}
 \section{Bối cảnh đề tài}
-% Nhu cầu trải nghiệm mùi hương trước khi mua; hạn chế của tester thủ công.
+Trong những năm gần đây, quá trình chuyển đổi số diễn ra mạnh mẽ trong lĩnh vực bán lẻ và dịch vụ. Các mô hình tự phục vụ như kiosk, máy bán hàng tự động hay quầy thanh toán không tiền mặt ngày càng phổ biến tại các trung tâm thương mại, sân bay và nhà ga. Cùng với đó, thanh toán bằng mã QR qua ứng dụng ngân hàng và ví điện tử đã trở thành thói quen của đa số người dùng tại Việt Nam, giúp quy trình mua hàng nhanh hơn và hạn chế sử dụng tiền mặt.
+ 
+Song song với xu hướng trên, công nghệ Internet vạn vật (Internet of Things -- IoT) cho phép các thiết bị vật lý kết nối với hệ thống phần mềm để gửi dữ liệu vận hành và nhận lệnh điều khiển từ xa. Nhờ đó, một chiếc máy đặt tại điểm bán có thể được giám sát trạng thái, theo dõi lượng hàng còn lại và cảnh báo sự cố mà không cần nhân viên trực tiếp kiểm tra từng máy.
+ 
+Trong ngành nước hoa, khách hàng thường muốn trải nghiệm mùi hương trước khi quyết định mua. Hiện nay, việc thử nước hoa chủ yếu diễn ra tại quầy của từng thương hiệu thông qua nhân viên tư vấn hoặc giấy thử mùi. Cách làm này phụ thuộc vào nhân viên và giờ hoạt động của cửa hàng, khó mở rộng ra nhiều địa điểm, và mỗi thương hiệu thường vận hành riêng lẻ nên khách khó so sánh nhiều dòng sản phẩm tại cùng một nơi. Về phía thương hiệu, việc theo dõi lượng nước hoa đã dùng, thời điểm cần nạp lại và tình trạng thiết bị tại nhiều điểm đặt cũng chưa được hỗ trợ bởi một nền tảng quản lý tập trung.
+ 
+Từ bối cảnh đó, đề tài \textit{ScentStation: Nền tảng IoT đa thương hiệu cho máy trải nghiệm và quản lý nước hoa} được đề xuất. Hệ thống gồm máy trải nghiệm (kiosk) cho phép khách chọn mùi hương, thanh toán bằng mã QR và nhận một lượt xịt thử, cùng với trang quản trị giúp các thương hiệu quản lý sản phẩm, máy, tồn kho, giao dịch và cảnh báo. Mô hình đa thương hiệu cho phép nhiều thương hiệu dùng chung một nền tảng, trong khi dữ liệu của từng thương hiệu vẫn được tách biệt và phân quyền truy cập 
 \section{Lý do chọn đề tài}
-% Tính cần thiết của nền tảng trải nghiệm nước hoa tự động.
+Nhóm lựa chọn đề tài ScentStation xuất phát từ ba lý do chính: thực tiễn, kỹ thuật và khả năng thực hiện.
+ 
+\textbf{Thứ nhất, xuất phát từ nhu cầu thực tiễn.} Việc thử nước hoa theo cách truyền thống còn nhiều hạn chế như phụ thuộc vào nhân viên, khó kiểm soát lượng nước hoa sử dụng và thiếu dữ liệu về hành vi lựa chọn của khách. Một máy trải nghiệm tự động với giá niêm yết cho từng lượt xịt giúp khách chủ động thử mùi, đồng thời giúp thương hiệu thu thập dữ liệu giao dịch và tồn kho chính xác hơn. Khi triển khai tại nhiều điểm, nhu cầu quản lý tập trung trạng thái máy, cảnh báo hết hàng và lịch sử bảo trì trở nên cần thiết.
+ 
+\textbf{Thứ hai, đề tài là bài toán tổng hợp có giá trị học tập.} Hệ thống đòi hỏi vận dụng nhiều kiến thức đã học: phân tích yêu cầu, thiết kế cơ sở dữ liệu quan hệ (ERD, từ điển dữ liệu), xây dựng backend nghiệp vụ, phân quyền theo vai trò và thương hiệu, xử lý thanh toán và giao tiếp với thiết bị IoT. Đặc biệt, luồng đơn hàng $\rightarrow$ thanh toán $\rightarrow$ ra lệnh xịt đặt ra yêu cầu chặt chẽ về tính đúng đắn: chỉ đơn đã thanh toán hợp lệ mới được xịt và mỗi đơn chỉ tạo tối đa một lượt xịt. Đây là các vấn đề thực tế của hệ thống giao dịch mà nhóm muốn nghiên cứu và giải quyết.
+ 
+\textbf{Thứ ba, phạm vi đề tài phù hợp với điều kiện thực hiện.} Nhóm giới hạn phạm vi ở mức sản phẩm khả dụng tối thiểu (MVP) gồm phần mềm web, backend, cơ sở dữ liệu SQL Server và máy IoT mô phỏng; thanh toán QR và phần cứng được mô phỏng bằng chương trình. Cách tiếp cận này cho phép nhóm hoàn thành một luồng demo xuyên suốt từ chọn mùi hương đến ghi nhận giao dịch trong thời gian bốn tuần, đồng thời bảo đảm các thành viên đều có phần việc rõ ràng và có thể kiểm thử được. Các công nghệ sử dụng như Python, Django, SQL Server và Bootstrap đều quen thuộc với nhóm và có tài liệu phong phú.
+ 
+Với những lý do trên, nhóm cho rằng ScentStation là đề tài vừa có tính ứng dụng, vừa phù hợp để rèn luyện kỹ năng thiết kế và xây dựng một hệ thống phần mềm hoàn chỉnh theo nhóm.
+
 \section{Mục tiêu đề tài}
 \subsection{Mục tiêu tổng quát}
 % Xây dựng nền tảng IoT đa thương hiệu cho trải nghiệm và quản lý nước hoa.
