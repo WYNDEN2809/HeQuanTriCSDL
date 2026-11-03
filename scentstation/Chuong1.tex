@@ -20,13 +20,16 @@ Với những lý do trên, nhóm cho rằng ScentStation là đề tài vừa c
 
 \section{Mục tiêu đề tài}
 \subsection{Mục tiêu tổng quát}
-% Xây dựng nền tảng IoT đa thương hiệu cho trải nghiệm và quản lý nước hoa.
+Xây dựng nền tảng IoT đa thương hiệu ScentStation cho phép khách hàng trải nghiệm nước hoa tự động (chọn mùi hương, thanh toán QR, nhận một lần xịt có kiểm soát) trên máy kiosk, đồng thời cung cấp cho các thương hiệu một hệ thống quản lý tập trung, an toàn và tách biệt dữ liệu (multi-tenant) để vận hành, giám sát từ xa, kiểm soát tồn kho, bảo trì, đối soát giao dịch và phân tích hiệu quả chiến dịch trải nghiệm nước hoa tại nhiều địa điểm.
 \subsection{Mục tiêu cụ thể}
 \begin{itemize}
-\item Hỗ trợ khách chọn mùi hương và tạo yêu cầu trải nghiệm.
-\item Quản lý thương hiệu, sản phẩm, máy và khe chứa.
-\item Ghi nhận thanh toán, kết quả cấp phát và lịch sử giao dịch.
-\item Theo dõi tồn kho ước tính và trạng thái máy.
+\item Kiosk nguyên mẫu: Chế tạo kiosk có tối thiểu 4 slot nước hoa điều khiển độc lập, tích hợp cảm biến, cơ cấu xịt hiệu chuẩn và các cơ chế an toàn; xây dựng ứng dụng cảm ứng cho phép chọn mùi hương, thanh toán QR và theo dõi trạng thái xịt.
+\item Thanh toán và xịt an toàn: Xây dựng quy trình đặt hàng, thanh toán QR có xác thực webhook, bảo đảm mỗi đơn đã thanh toán chỉ xịt tối đa một lần (lệnh có chữ ký, idempotent, xử lý riêng các trường hợp kết quả không chắc chắn).
+\item IoT và giám sát từ xa: Xây dựng IoT gateway (MQTT) để thu thập heartbeat, telemetry, sự kiện; gửi lệnh bảo mật và cấu hình từ xa; hỗ trợ đồng bộ khi mất mạng; chặn thiết bị không hợp lệ.
+\item Quản trị đa thương hiệu: Xây dựng cơ chế multi-tenant với cô lập dữ liệu, phân quyền theo vai trò, địa điểm, máy; quản lý thương hiệu, sản phẩm, giá, máy, slot và chiến dịch khuyến mãi.
+\item Tồn kho, cảnh báo và bảo trì: Quản lý chai/cartridge, nạp và thay thế; ước tính lượng còn lại và đối chiếu với cảm biến; tự động cảnh báo (sắp hết, nghi rò rỉ, mất kết nối) và quản lý quy trình bảo trì đến khi máy hoạt động lại.
+\item Đối soát, báo cáo và truy vết: Đối soát giao dịch với nhà cung cấp thanh toán, xử lý hoàn tiền; cung cấp dashboard, báo cáo (xuất CSV/Excel) và nhật ký audit truy vết từ đơn hàng đến kết quả xịt.
+\item Kiểm thử và triển khai: Kiểm thử tự động, bảo mật, độ tin cậy; tích hợp end-to-end, thí điểm, triển khai cloud; bàn giao mã nguồn, gói triển khai và tài liệu kỹ thuật, hướng dẫn sử dụng.
 \end{itemize}
 \section{Đối tượng và phạm vi nghiên cứu}
 
