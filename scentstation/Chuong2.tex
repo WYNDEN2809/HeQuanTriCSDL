@@ -31,13 +31,61 @@
   \item Lưu lịch sử lắp đặt, di dời, cấu hình, bảo dưỡng; thay đổi cấu hình quan trọng được ghi vào nhật ký kiểm toán.
 \end{itemize}
 \subsection{Quản lý sản phẩm nước hoa}
-
+\begin{itemize}
+  \item Quản trị viên thương hiệu quản lý tên, mô tả, hình ảnh, nốt hương, giá mỗi lần xịt và tình trạng sẵn có của sản phẩm.
+  \item Cấu hình chiến dịch khuyến mãi, dùng thử miễn phí hoặc giá tạm thời; thay đổi giá được ghi vào nhật ký kiểm toán.
+  \item Kiosk chỉ hiển thị sản phẩm thuộc khe sẵn sàng của máy đang online và hoạt động, kèm chi tiết mùi hương và mã QR sản phẩm dẫn tới thông tin thêm hoặc kênh mua hàng.
+\end{itemize}
 \subsection{Quản lý đơn hàng và thanh toán}
+\begin{itemize}
+  \item Chỉ tạo đơn khi máy và khe được chọn sẵn sàng; không nhận đơn mới khi máy không liên lạc được với backend.
+  \item Đơn lưu tenant, máy, khe, sản phẩm, giá, đơn vị tiền tệ và thời hạn tại thời điểm tạo (trạng thái ban đầu PENDING); mỗi đơn có mã tham chiếu thanh toán và mã QR duy nhất.
+  \item Chỉ xác nhận PAID sau khi backend nhận webhook và xác minh chữ ký, mã tham chiếu, số tiền, tiền tệ, trạng thái; không xử lý một thông báo hai lần. Kết quả hiển thị trên kiosk không phải bằng chứng thanh toán.
+  \item Đơn chưa thanh toán tự động hết hạn; đơn thất bại, bị hủy hoặc hết hạn không được tạo lệnh cấp phát.
+  \item Lưu lịch sử trạng thái đơn và thanh toán; hỗ trợ hoàn tiền hoặc xem xét thủ công khi đã thanh toán nhưng cấp phát không thành công; đối soát với nhà cung cấp thanh toán.
+  \item Tìm kiếm giao dịch theo thời gian, máy, địa điểm, nước hoa, mã tham chiếu, trạng thái; kiosk tự quay về màn hình chính sau giao dịch hoặc khi không hoạt động.
+\end{itemize}
 \subsection{Quản lý cấp phát nước hoa}
+\begin{itemize}
+  \item Chỉ tạo lệnh cấp phát (DispenseTransaction) sau khi backend xác minh thanh toán; mỗi lệnh có mã định danh duy nhất, máy và khe đích, thời hạn và chữ ký bảo mật; mỗi đơn có tối đa một lệnh đang hoạt động.
+  \item Lệnh gửi qua kênh IoT bảo mật; thiết bị xác nhận trước khi thực thi và từ chối lệnh không hợp lệ, hết hạn, trùng lặp hoặc sai địa chỉ.
+  \item Không cấp phát khi cửa mở, máy đang bảo trì, khe rỗng hoặc có lỗi phần cứng nghiêm trọng.
+  \item Ghi lại xác nhận lệnh, thời điểm thực thi, kết quả, dữ liệu cảm biến và mã lỗi.
+  \item Chỉ chuyển đơn sang DISPENSED khi máy báo thành công; kết quả thất bại (DISPENSE\_FAILED) hoặc không chắc chắn được đưa vào xem xét vận hành, không tự động xịt lần hai.
+  \item Chỉ thử lại cấp phát khi người có thẩm quyền đã xác nhận lần xịt trước chưa xảy ra.
+\end{itemize}
 \subsection{Giám sát thiết bị và dữ liệu IoT}
+\begin{itemize}
+  \item Nhận heartbeat định kỳ, cập nhật thời điểm liên lạc gần nhất (last\_seen\_at) và phân loại máy online, không ổn định hoặc offline.
+  \item Thu thập telemetry (trọng lượng khe, lượng nước hoa ước tính, cửa, rò rỉ, bộ truyền động, nguồn) và sự kiện thiết bị (khởi động, kết nối lại, lỗi cảm biến, lỗi cấp phát), lưu vào DeviceEvent.
+  \item Gửi lệnh bảo mật (cấp phát, chẩn đoán, yêu cầu trạng thái, cập nhật cấu hình) và gắn mỗi lệnh với xác nhận và kết quả cuối cùng.
+  \item Thiết bị lưu tạm sự kiện khi mất mạng và đồng bộ lại mà không tạo bản ghi trùng.
+  \item Theo dõi phiên bản firmware, cấu hình; từ chối liên lạc từ thiết bị chưa đăng ký, đã thu hồi hoặc không hợp lệ.
+\end{itemize}
 \subsection{Quản lý tồn kho và tiếp thêm nước hoa}
+\begin{itemize}
+  \item Quản lý chai/hộp theo mã định danh, lô, ngày nhận, ngày hết hạn và trạng thái (sẵn có, đã lắp, gần hết, trống, hư hỏng, hết hạn); gán chai cho khe và xác minh đúng mùi hương, đúng khe.
+  \item Ước tính lượng còn lại từ số lần xịt thành công và mức tiêu thụ đã hiệu chuẩn, đối chiếu với số liệu cảm biến.
+  \item Chỉ lần cấp phát khách hàng đã xác nhận mới trừ tồn kho bán hàng; lần xịt chẩn đoán được ghi nhận riêng.
+  \item Ghi mỗi lần nạp lại (REFILL), thay thế, tháo, điều chỉnh vào InventoryLog (người thực hiện, thời gian, máy, khe, chai cũ và mới); điều chỉnh thủ công bắt buộc có lý do.
+  \item Đánh dấu khe không khả dụng khi không đủ nước hoa cho một lần xịt an toàn; phát hiện nghi ngờ rò rỉ khi lượng hao hụt đo được lệch đáng kể so với lượng cấp phát đã ghi nhận.
+\end{itemize}
 \subsection{Quản lý cảnh báo và bảo trì}
+\begin{itemize}
+  \item Tự động tạo cảnh báo (Alert) cho máy offline, tồn kho thấp (LOW\_STOCK), khe trống (EMPTY), cửa mở, nghi ngờ rò rỉ, lỗi cảm biến, lỗi bộ truyền động và lỗi cấp phát lặp lại; phân loại theo loại, mức độ, máy, địa điểm; không tạo trùng cho cùng sự cố chưa xử lý.
+  \item Thông báo cho người chịu trách nhiệm; cho phép xác nhận, gán, giải quyết, mở lại cảnh báo; leo thang khi quá thời hạn cấu hình.
+  \item Tạo phiếu bảo trì (MaintenanceRecord) thủ công hoặc tự động từ cảnh báo quan trọng, gán cho kỹ thuật viên; máy có phiếu quan trọng không nhận đơn mới.
+  \item Kỹ thuật viên ghi kết quả chẩn đoán, hành động khắc phục, linh kiện thay thế và hoàn thành checklist bảo trì.
+  \item Máy chỉ hoạt động lại sau khi hoàn thành checklist và kiểm tra sau bảo trì; phiếu chỉ được đóng khi đã ghi nhận kết quả sửa chữa.
+\end{itemize}
 \subsection{Thống kê, báo cáo và nhật ký hệ thống}
+\begin{itemize}
+  \item Dashboard hiển thị máy theo trạng thái, giao dịch và doanh thu theo thời gian, tỷ lệ cấp phát thành công và thất bại, trường hợp đã thanh toán nhưng chưa xác nhận cấp phát, hương thơm được chọn nhiều nhất, tồn kho và khe sắp hết.
+  \item Báo cáo vận hành: thời gian hoạt động, thời gian dừng, tần suất cảnh báo, thời gian giải quyết trung bình.
+  \item Lọc theo thương hiệu, địa điểm, máy, sản phẩm, thời gian trong phạm vi được ủy quyền; xuất CSV hoặc Excel; báo cáo toàn nền tảng chỉ dành cho Quản trị viên nền tảng.
+  \item Nhật ký kiểm toán ghi tác nhân, tenant, hành động, đối tượng, dấu thời gian và giá trị trước/sau cho các thao tác quan trọng (giá, gán khe, quyền, tồn kho, hoàn tiền, bảo trì, lệnh thiết bị, thanh toán); người dùng thông thường không được sửa hoặc xóa.
+  \item Truy vết xuyên suốt từ đơn hàng, thanh toán, lệnh cấp phát, kết quả thiết bị, trừ tồn kho đến sự cố vận hành và hoàn tiền (nếu có).
+\end{itemize}
 
 \section{Yêu cầu phi chức năng}
 
