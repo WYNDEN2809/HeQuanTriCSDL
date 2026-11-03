@@ -13,6 +13,8 @@
 \subsection{Khách hàng (Customer/Kiosk User)}
 % Phân biệt vai trò trong đề xuất với vai trò thực tế của phiên bản triển khai.
 \section{Yêu cầu chức năng}
+
+\subsection{Quản lý thương hiệu, người dùng và phân quyền}
 \begin{itemize}
   \item Quản trị viên nền tảng tạo, kích hoạt, tạm ngưng thương hiệu (tenant) và tạo tài khoản Quản trị viên thương hiệu cho từng tenant.
   \item Mỗi người dùng thuộc một thương hiệu, có một hoặc nhiều vai trò; quyền có thể gán theo vai trò, địa điểm hoặc máy.
@@ -20,9 +22,16 @@
   \item Quản trị viên được ủy quyền kích hoạt, khóa, đặt lại tài khoản; phiên đang hoạt động bị thu hồi khi tài khoản bị vô hiệu hóa.
   \item Thao tác nhạy cảm (hoàn tiền, điều chỉnh tồn kho, xịt chẩn đoán, cấu hình lại máy) yêu cầu ủy quyền bổ sung; đăng nhập và thay đổi tài khoản, vai trò, quyền đều được ghi lại.
 \end{itemize}
-\subsection{Quản lý thương hiệu, người dùng và phân quyền}
 \subsection{Quản lý máy và khe chứa}
+\begin{itemize}
+  \item Đăng ký mỗi máy bằng số sê-ri và định danh thiết bị duy nhất; liên kết với một tenant và một địa điểm.
+  \item Cấu hình số khe trên mỗi máy; mỗi khe có sản phẩm, giá, ngưỡng tồn kho thấp, liều xịt đã hiệu chuẩn và trạng thái sẵn có.
+  \item Mỗi khe chỉ có một chai/hộp nước hoa đang hoạt động tại một thời điểm.
+  \item Hiển thị trạng thái kết nối, chế độ hoạt động, phiên bản firmware và thời điểm liên lạc cuối; người dùng được ủy quyền bật hoặc tắt máy hoặc từng khe.
+  \item Lưu lịch sử lắp đặt, di dời, cấu hình, bảo dưỡng; thay đổi cấu hình quan trọng được ghi vào nhật ký kiểm toán.
+\end{itemize}
 \subsection{Quản lý sản phẩm nước hoa}
+
 \subsection{Quản lý đơn hàng và thanh toán}
 \subsection{Quản lý cấp phát nước hoa}
 \subsection{Giám sát thiết bị và dữ liệu IoT}
