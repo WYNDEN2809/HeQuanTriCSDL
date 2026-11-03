@@ -77,3 +77,45 @@ Xây dựng nền tảng IoT đa thương hiệu ScentStation cho phép khách h
 \end{itemize}
 
 }
+
+
+\section{Phương pháp thực hiện}
+
+Dự án ScentStation được triển khai theo phương pháp Agile, kết hợp phân tích, thiết kế, lập trình và kiểm thử hệ thống.
+
+Nhóm khảo sát yêu cầu, chốt danh sách chức năng MVP, thiết kế kiến trúc tổng thể, vẽ Use Case và ERD. Đồng thời thiết kế cấu trúc CSDL SQL Server, thống nhất tên bảng, kiểu dữ liệu và trạng thái nghiệp vụ. Ba ngày đầu quan trọng nhất vì mọi quyết định về phạm vi và kiến trúc đều được khóa ở đây.
+
+Backend dùng Django kết nối SQL Server, triển khai đăng nhập, phân quyền và các API cơ bản. Song song, giao diện ki-ốt và trang quản trị được dựng bằng HTML, CSS, Bootstrap. Mỗi thành viên làm module riêng với dữ liệu giả để không phụ thuộc lẫn nhau.
+
+Xây chương trình mô phỏng máy xịt nước hoa 4 khe, tích hợp thanh toán QR giả lập, xử lý luồng đơn hàng và cập nhật tồn kho. Đây là tuần kiểm tra xem các phần đã làm có nối được với nhau hay không. Cảnh báo tồn kho thấp và trạng thái máy cũng được đưa vào giai đoạn này.
+
+Chạy lại toàn bộ luồng thanh toán -- phun, kiểm tra phân quyền, xử lý các tình huống lỗi và ghi nhận bằng chứng. Báo cáo, tài liệu và sản phẩm demo được chốt trong hai ngày cuối.
+
+Các thành viên được phân công theo từng module và phối hợp thông qua GitHub để quản lý mã nguồn, tích hợp chức năng.
+
+%==================================================
+\section{Công nghệ và công cụ dự kiến}
+
+\begin{description}[style=nextline, leftmargin=1cm]
+  \item[Ngôn ngữ chính: Python.] Dùng cho backend nghiệp vụ, xử lý đơn hàng, mô phỏng máy xịt và viết test.
+  \item[Framework: Django.] Xử lý đăng nhập, phân quyền, API, trang quản trị và cả giao diện web. Không tách frontend React riêng để tiết kiệm thời gian.
+  \item[Cơ sở dữ liệu: SQL Server.] Lưu tài khoản, thương hiệu, sản phẩm, máy, khe, đơn hàng và giao dịch. Có ràng buộc khóa ngoại và dữ liệu seed sẵn.
+  \item[Giao diện: HTML + CSS + Bootstrap.] Làm kiosk và admin responsive, chạy được trên máy tính bảng.
+  \item[Quản lý mã nguồn: Git + GitHub.] Mỗi người làm nhánh riêng, tạo Pull Request trước khi merge vào nhánh chính.
+\end{description}
+
+Mô hình máy IoT được mô phỏng bằng code.
+
+%==================================================
+\section{Kết quả dự kiến}
+
+Sau khi hoàn thành nhóm sẽ bàn giao một sản phẩm demo chạy được từ đầu đến cuối.
+
+\begin{itemize}
+  \item Hệ thống đăng nhập đa tenant, phân quyền cơ bản, Brand này không đọc được dữ liệu Brand khác.
+  \item Kiosk cho khách chọn mùi, tạo đơn, thanh toán QR giả, xem trạng thái phun và nhận thông báo lỗi nếu không phun được.
+  \item Trang quản trị: CRUD sản phẩm, quản lý máy và 4 khe, ghi nhận refill, xem lịch sử giao dịch và cảnh báo tồn kho thấp.
+  \item Máy mô phỏng 4 khe độc lập: nhận lệnh, kiểm tra điều kiện, trả kết quả, cập nhật tồn kho chỉ khi phun thành công, tạo cảnh báo cơ bản.
+  \item Database có script cài đặt, seed data, tài khoản rõ ràng theo vai trò.
+  \item Tài liệu: ERD, API contract, sequence diagram, testcase, ảnh và video minh chứng và báo cáo theo module.
+\end{itemize}
