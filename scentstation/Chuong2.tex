@@ -90,11 +90,39 @@
 \section{Yêu cầu phi chức năng}
 
 \subsection{Hiệu năng}
+\begin{itemize}
+  \item Trạng thái thanh toán và telemetry được cập nhật với độ trễ thấp trong điều kiện mạng bình thường.
+  \item Các truy vấn thường dùng (đơn hàng theo trạng thái, tồn kho theo khe, cảnh báo đang mở) được hỗ trợ bằng chỉ mục trên SQL Server.
+\end{itemize}
 \subsection{Tính sẵn sàng}
+\begin{itemize}
+  \item Nền tảng hoạt động ổn định trong thời gian kiosk được sử dụng.
+  \item Khi máy không thể cấp phát an toàn (mất liên lạc với backend, bảo trì, cửa mở, khe rỗng, lỗi nghiêm trọng), hệ thống vô hiệu hóa việc mua mới.
+  \item Thiết bị lưu tạm sự kiện khi mất mạng và đồng bộ lại sau khi kết nối.
+\end{itemize}
 \subsection{Bảo mật}
+\begin{itemize}
+  \item Cô lập dữ liệu giữa các thương hiệu (tenant); xác thực và phân quyền theo vai trò (RBAC) và phạm vi.
+  \item Giao tiếp mã hóa bằng TLS; webhook thanh toán được xác minh chữ ký; lệnh gửi xuống thiết bị có chữ ký, thiết bị chưa đăng ký hoặc đã thu hồi bị từ chối.
+  \item Thao tác nhạy cảm được ghi vào nhật ký kiểm toán, người dùng thông thường không được sửa hoặc xóa.
+\end{itemize}
 \subsection{Độ tin cậy và nhất quán}
+\begin{itemize}
+  \item Mỗi đơn hàng đã xác nhận thanh toán chỉ tạo tối đa một lần xịt.
+  \item Lệnh cấp phát, webhook và thao tác thử lại có tính idempotent: xử lý lặp lại không tạo ra kết quả trùng.
+  \item Các thao tác đồng thời (tạo đơn, thanh toán, cấp phát, thay đổi tồn kho) tuân thủ tính chất ACID; mọi bước từ đơn hàng đến kết quả xịt đều truy xuất được.
+\end{itemize}
 \subsection{Khả năng mở rộng}
+\begin{itemize}
+  \item Hỗ trợ thêm thương hiệu, địa điểm, máy, khe và người dùng mà không phải thay đổi cấu trúc hệ thống.
+  \item Đáp ứng khối lượng telemetry tăng dần khi số máy tăng; dữ liệu lịch sử có thể tổng hợp để phục vụ báo cáo.
+\end{itemize}
 \subsection{Khả năng sử dụng và bảo trì}
+\begin{itemize}
+  \item Giao diện kiosk và quản trị phản hồi nhanh, dễ tiếp cận, có hướng dẫn rõ ràng khi thanh toán, cấp phát, nạp lại và gặp lỗi; hiển thị tốt trên nhiều kích thước màn hình.
+  \item Các module có thể kiểm thử và quan sát được; thiết bị thực thi các quy tắc an toàn về cửa, tồn kho, thời gian chờ và cơ cấu xịt.
+\end{itemize}
+
 \section{Quy tắc nghiệp vụ}
 \begin{enumerate}
 \item Mỗi máy thuộc về một thương hiệu tại một thời điểm.
