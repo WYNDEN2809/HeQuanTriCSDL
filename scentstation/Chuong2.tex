@@ -13,6 +13,13 @@
 \subsection{Khách hàng (Customer/Kiosk User)}
 % Phân biệt vai trò trong đề xuất với vai trò thực tế của phiên bản triển khai.
 \section{Yêu cầu chức năng}
+\begin{itemize}
+  \item Quản trị viên nền tảng tạo, kích hoạt, tạm ngưng thương hiệu (tenant) và tạo tài khoản Quản trị viên thương hiệu cho từng tenant.
+  \item Mỗi người dùng thuộc một thương hiệu, có một hoặc nhiều vai trò; quyền có thể gán theo vai trò, địa điểm hoặc máy.
+  \item Người dùng chỉ truy cập dữ liệu và chức năng trong phạm vi được gán, không truy cập dữ liệu của thương hiệu khác.
+  \item Quản trị viên được ủy quyền kích hoạt, khóa, đặt lại tài khoản; phiên đang hoạt động bị thu hồi khi tài khoản bị vô hiệu hóa.
+  \item Thao tác nhạy cảm (hoàn tiền, điều chỉnh tồn kho, xịt chẩn đoán, cấu hình lại máy) yêu cầu ủy quyền bổ sung; đăng nhập và thay đổi tài khoản, vai trò, quyền đều được ghi lại.
+\end{itemize}
 \subsection{Quản lý thương hiệu, người dùng và phân quyền}
 \subsection{Quản lý máy và khe chứa}
 \subsection{Quản lý sản phẩm nước hoa}
@@ -22,7 +29,9 @@
 \subsection{Quản lý tồn kho và tiếp thêm nước hoa}
 \subsection{Quản lý cảnh báo và bảo trì}
 \subsection{Thống kê, báo cáo và nhật ký hệ thống}
+
 \section{Yêu cầu phi chức năng}
+
 \subsection{Hiệu năng}
 \subsection{Tính sẵn sàng}
 \subsection{Bảo mật}
