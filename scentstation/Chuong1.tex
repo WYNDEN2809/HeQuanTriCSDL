@@ -38,10 +38,10 @@ Xây dựng nền tảng IoT đa thương hiệu ScentStation cho phép khách h
 \subsection{Đối tượng nghiên cứu}
 Đề tài tập trung nghiên cứu và xây dựng các thành phần cốt lõi của nền tảng \textbf{ScentStation}, bao gồm:
 \begin{itemize}[leftmargin=1.5cm]
-    \item \textbf{Cơ sở dữ liệu quan hệ cho hệ thống đa thương hiệu (Multi-tenant):} Nghiên cứu mô hình thực thể liên kết (ERD), thiết kế lược đồ bảng dữ liệu trên hệ quản trị SQL Server nhằm quản lý tách biệt dữ liệu giữa các thương hiệu (\texttt{Brand}, \texttt{BrandMember}), quản lý danh mục nước hoa (\texttt{Perfume}), cấu hình kiosk và hộc chứa (\texttt{Machine}, \texttt{MachineSlot}) cùng các quy tắc toàn vẹn dữ liệu giao dịch.
-    \item \textbf{Quy trình giao dịch và kiểm soát cấp phát phần cứng:} Nghiên cứu vòng đời đơn hàng và thanh toán (\texttt{Orders}, \texttt{Payment}) từ trạng thái khởi tạo (\texttt{PENDING}), xác nhận thanh toán (\texttt{PAID}) cho tới kích hoạt lệnh phun nước hoa trải nghiệm (\texttt{DispenseTransaction}) với các trạng thái xử lý (\texttt{DISPENSED}, \texttt{DISPENSE\_FAILED}).
-    \item \textbf{Cơ chế giám sát thiết bị và vận hành bảo trì:} Cơ chế cập nhật tín hiệu hoạt động định kỳ (\texttt{last\_seen\_at}) của kiosk, theo dõi biến động dung tích/lượt xịt hộc chứa (\texttt{InventoryLog}), ghi nhận nhật ký phần cứng (\texttt{DeviceEvent}) và điều phối quy trình xử lý sự cố, bảo trì kỹ thuật (\texttt{Alert}, \texttt{MaintenanceRecord}).
-    \item \textbf{Kiến trúc ứng dụng Backend và giao diện điều khiển:} Ứng dụng kiến trúc MVC/MVT với framework Django (Python) để xây dựng cổng quản trị tập trung, xử lý logic phân quyền người dùng (\texttt{User}) và mô phỏng tương tác máy trải nghiệm.
+    \item \textbf{Cơ sở dữ liệu quan hệ cho hệ thống đa thương hiệu (Multi-tenant):} Nghiên cứu mô hình thực thể liên kết (ERD), thiết kế lược đồ bảng dữ liệu trên hệ quản trị SQL Server nhằm quản lý tách biệt dữ liệu giữa các thương hiệu (Brand, BrandMember), quản lý danh mục nước hoa (Perfume), cấu hình kiosk và hộc chứa (Machine, MachineSlot) cùng các quy tắc toàn vẹn dữ liệu giao dịch.
+    \item \textbf{Quy trình giao dịch và kiểm soát cấp phát phần cứng:} Nghiên cứu vòng đời đơn hàng và thanh toán (Orders, Payment) từ trạng thái khởi tạo (PENDING), xác nhận thanh toán (PAID) cho tới kích hoạt lệnh phun nước hoa trải nghiệm (DispenseTransaction) với các trạng thái xử lý (DISPENSED, DISPENSE\_FAILED).
+    \item \textbf{Cơ chế giám sát thiết bị và vận hành bảo trì:} Cơ chế cập nhật tín hiệu hoạt động định kỳ (last\_seen\_at) của kiosk, theo dõi biến động dung tích/lượt xịt hộc chứa (InventoryLog), ghi nhận nhật ký phần cứng (DeviceEvent) và điều phối quy trình xử lý sự cố, bảo trì kỹ thuật (Alert, MaintenanceRecord).
+    \item \textbf{Kiến trúc ứng dụng Backend và giao diện điều khiển:} Ứng dụng kiến trúc MVC/MVT với framework Django (Python) để xây dựng cổng quản trị tập trung, xử lý logic phân quyền người dùng (User) và mô phỏng tương tác máy trải nghiệm.
 \end{itemize}
 
 \subsection{Phạm vi nghiên cứu}
@@ -50,14 +50,14 @@ Xây dựng nền tảng IoT đa thương hiệu ScentStation cho phép khách h
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Phía người dùng trải nghiệm (Giao diện Kiosk):}
     \begin{itemize}
-        \item Khách hàng duyệt danh mục nước hoa theo từng thương hiệu, xem thông tin chi tiết mùi hương, giá niêm yết cho mỗi lượt xịt (\texttt{price\_per\_spray}) và kiểm tra trạng thái sẵn sàng của hộc chứa (\texttt{AVAILABLE}).
-        \item Hệ thống tạo đơn hàng trải nghiệm kèm mã phản hồi nhanh (QR Code), thiết lập thời gian hết hạn (\texttt{expires\_at}) và hiển thị hướng dẫn vị trí vòi xịt khi thanh toán thành công.
+        \item Khách hàng duyệt danh mục nước hoa theo từng thương hiệu, xem thông tin chi tiết mùi hương, giá niêm yết cho mỗi lượt xịt (price\_per\_spray) và kiểm tra trạng thái sẵn sàng của hộc chứa (AVAILABLE).
+        \item Hệ thống tạo đơn hàng trải nghiệm kèm mã phản hồi nhanh (QR Code), thiết lập thời gian hết hạn (expires\_at) và hiển thị hướng dẫn vị trí vòi xịt khi thanh toán thành công.
     \end{itemize}
     \item \textbf{Phía quản trị và vận hành (Web Portal):}
     \begin{itemize}
         \item \textit{Quản trị viên hệ thống (SuperAdmin):} Quản lý tài khoản, cấu hình tham số nền tảng, tạo thương hiệu và giám sát toàn bộ mạng lưới máy kiosk.
-        \item \textit{Quản trị viên thương hiệu (BrandAdmin):} Quản lý danh mục nước hoa của riêng nhãn hàng, gán quyền nhân sự nội bộ (\texttt{BrandMember}) và theo dõi doanh thu đơn hàng phát sinh từ sản phẩm của mình.
-        \item \textit{Kỹ thuật viên và nhân viên kho (Technician / Inventory):} Tiếp nhận các cảnh báo hộc chứa sắp hết (\texttt{LOW\_STOCK}), hết hàng (\texttt{EMPTY}) hoặc lỗi cấp phát (\texttt{DISPENSE\_FAILED}); cập nhật nhật ký nạp nước hoa (\texttt{REFILL}) và quản lý phiếu bảo trì sửa chữa máy (\texttt{MaintenanceRecord}).
+        \item \textit{Quản trị viên thương hiệu (BrandAdmin):} Quản lý danh mục nước hoa của riêng nhãn hàng, gán quyền nhân sự nội bộ (BrandMember) và theo dõi doanh thu đơn hàng phát sinh từ sản phẩm của mình.
+        \item \textit{Kỹ thuật viên và nhân viên kho (Technician / Inventory):} Tiếp nhận các cảnh báo hộc chứa sắp hết (LOW\_STOCK), hết hàng (EMPTY) hoặc lỗi cấp phát (DISPENSE\_FAILED); cập nhật nhật ký nạp nước hoa (REFILL) và quản lý phiếu bảo trì sửa chữa máy (MaintenanceRecord).
     \end{itemize}
 \end{itemize}
 
@@ -65,7 +65,7 @@ Xây dựng nền tảng IoT đa thương hiệu ScentStation cho phép khách h
 \begin{itemize}[leftmargin=1.5cm]
     \item \textbf{Hệ quản trị cơ sở dữ liệu:} Sử dụng Microsoft SQL Server làm nền tảng lưu trữ chính. Thiết kế chuẩn hóa 14 bảng dữ liệu, ràng buộc khóa chính/khóa ngoại, chỉ mục (Index) hỗ trợ truy vấn nhanh và bảo đảm tính nhất quán giao dịch (ACID) khi đồng thời phát sinh đơn hàng và thay đổi tồn kho.
     \item \textbf{Backend và giao diện Web:} Ứng dụng ngôn ngữ Python kết hợp nền tảng Django Framework để phát triển toàn bộ hệ thống logic nghiệp vụ, quản lý phiên làm việc, phân quyền dựa trên vai trò (RBAC). Giao diện hiển thị sử dụng Django Template kết hợp HTML, CSS và thư viện Bootstrap để xây dựng giao diện web tương thích đa kích thước màn hình.
-    \item \textbf{Mô phỏng thiết bị và cấp phát IoT:} Nghiên cứu và xây dựng module phần mềm bằng Python đóng vai trò giả lập (Simulator) cho mạch điều khiển kiosk. Module này chịu trách nhiệm nhận lệnh xịt từ Backend, phản hồi kết quả thực thi (\texttt{SUCCESS} hoặc \texttt{FAILED}) và gửi dữ liệu sự kiện thiết bị (\texttt{DeviceEvent}) lên máy chủ.
+    \item \textbf{Mô phỏng thiết bị và cấp phát IoT:} Nghiên cứu và xây dựng module phần mềm bằng Python đóng vai trò giả lập (Simulator) cho mạch điều khiển kiosk. Module này chịu trách nhiệm nhận lệnh xịt từ Backend, phản hồi kết quả thực thi (SUCCESS hoặc FAILED) và gửi dữ liệu sự kiện thiết bị (DeviceEvent) lên máy chủ.
     \item \textbf{Quy trình phát triển và kiểm thử:} Ứng dụng hệ thống kiểm soát phiên bản Git và nền tảng GitHub theo mô hình phân nhánh (Branching \& Pull Request); sử dụng bộ công cụ kiểm thử tích hợp của Python để kiểm tra đơn vị (Unit Test) cho luồng đặt hàng và thanh toán.
 \end{itemize}
 
