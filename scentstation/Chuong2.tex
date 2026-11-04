@@ -4,40 +4,30 @@
 \section{Tổng quan nghiệp vụ}
 
 \subsection{Nghiệp vụ trải nghiệm nước hoa}
-Quy trình phục vụ khách hàng tại kiosk diễn ra tự động qua các bước[cite: 29]:
-\begin{itemize}[leftmargin=1.2cm]
-    \item \textbf{Khám phá và lựa chọn:} Khách hàng duyệt danh mục nước hoa (\textit{Perfume}) theo từng thương hiệu (\textit{Brand}), xem thông tin mô tả và giá niêm yết cho mỗi lượt xịt (\textit{price\_per\_spray})[cite: 29]. Hệ thống kiểm tra hộc chứa (\textit{MachineSlot}) tương ứng phải ở trạng thái khả dụng (\textit{AVAILABLE})[cite: 29].
-    \item \textbf{Tạo đơn và thanh toán:} Kiosk khởi tạo đơn hàng (\textit{Orders}) ở trạng thái chờ (\textit{PENDING}) cùng chi tiết đơn (\textit{OrderItem}), hiển thị mã QR thanh toán kèm thời gian hết hạn (\textit{expires\_at})[cite: 29]. Sau khi nhận phản hồi giao dịch thành công từ cổng thanh toán (\textit{Payment.status = SUCCESS}), đơn hàng chuyển sang trạng thái đã trả tiền (\textit{PAID})[cite: 29].
-    \item \textbf{Cấp phát trải nghiệm:} Backend gửi lệnh kích hoạt vòi xịt tới thiết bị IoT và tạo bản ghi thực thi (\textit{DispenseTransaction})[cite: 29]. Nếu xịt thành công, đơn hàng hoàn tất (\textit{DISPENSED}), đồng thời hệ thống tự động trừ lượng tồn kho (\textit{quantity}) và ghi nhật ký (\textit{InventoryLog})[cite: 29]. Nếu lỗi, hệ thống cập nhật trạng thái thất bại (\textit{DISPENSE\_FAILED}) để đối soát hoàn tiền[cite: 29].
-\end{itemize}
+Khách hàng chọn sản phẩm nước hoa trên màn hình kiosk, hệ thống kiểm tra hộc chứa tương ứng ở trạng thái sẵn sàng (AVAILABLE) và tạo đơn hàng (Orders) kèm mã QR. Sau khi thanh toán thành công (Payment chuyển SUCCESS, đơn hàng thành PAID), máy kích hoạt lệnh xịt (DispenseTransaction chuyển DISPENSED), trừ tồn kho và ghi nhật ký (InventoryLog).
 
 \subsection{Nghiệp vụ quản lý vận hành}
-Hệ thống quản trị tập trung điều phối hoạt động kỹ thuật và tồn kho[cite: 29]:
-\begin{itemize}[leftmargin=1.2cm]
-    \item \textbf{Giám sát thiết bị IoT:} Máy kiosk gửi tín hiệu định kỳ (\textit{last\_seen\_at}) để cập nhật trạng thái kết nối (\textit{ONLINE, OFFLINE, MAINTENANCE, DISABLED}) và ghi nhận nhật ký phần cứng (\textit{DeviceEvent})[cite: 29].
-    \item \textbf{Cảnh báo và bảo trì:} Khi hộc chứa cạn kiệt (\textit{EMPTY}) hoặc máy gặp sự cố (\textit{DISPENSE\_FAILED}), hệ thống tự động phát cảnh báo (\textit{Alert})[cite: 29]. Đội ngũ kỹ thuật tiếp nhận và lập phiếu bảo trì (\textit{MaintenanceRecord}) để sửa chữa, thay thế hoặc nạp đầy dung dịch (\textit{REFILL})[cite: 29].
-\end{itemize}
+Hệ thống giám sát kết nối thiết bị định kỳ (last_seen_at) và ghi nhận sự kiện phần cứng (DeviceEvent). Khi hộc chứa sắp hết (LOW_STOCK), cạn dung dịch (EMPTY) hoặc phát sinh lỗi xịt (DISPENSE_FAILED), hệ thống tự động tạo cảnh báo (Alert) để kỹ thuật viên tiếp nhận và xử lý qua phiếu bảo trì (MaintenanceRecord).
 
 \section{Các tác nhân và vai trò}
-Dựa trên phân quyền bảng người dùng (\textit{User.role}) và thành viên thương hiệu (\textit{BrandMember.brand\_role}), hệ thống chia thành 6 tác nhân chính[cite: 29]:
 
 \subsection{Quản trị viên nền tảng (Platform Super Administrator)}
-Nắm toàn quyền hệ thống (\textit{role = SuperAdmin}); phụ trách tạo và kiểm duyệt tài khoản (\textit{User}), thêm mới đối tác thương hiệu (\textit{Brand}), quản lý danh mục máy Kiosk (\textit{Machine}) và giám sát toàn bộ luồng giao dịch, nhật ký lỗi trên toàn nền tảng[cite: 29].
+Toàn quyền quản lý hệ thống: tài khoản người dùng, đối tác thương hiệu, danh mục máy kiosk và giám sát toàn bộ luồng dữ liệu, cảnh báo sự cố.
 
 \subsection{Quản trị viên thương hiệu (Brand Administrator)}
-Đại diện của từng nhãn hàng nước hoa; có quyền quản lý danh mục sản phẩm (\textit{Perfume}) của thương hiệu mình, thiết lập đơn giá xịt (\textit{price\_per\_spray}), phân quyền nhân sự nội bộ (\textit{BrandMember}) và theo dõi số liệu doanh thu thực tế[cite: 29].
+Quản lý danh mục nước hoa, cấu hình giá xịt trải nghiệm của thương hiệu và phân quyền nhân sự nội bộ thuộc thương hiệu đó.
 
 \subsection{Quản lý vận hành (Operations Manager)}
-Theo dõi mạng lưới kiosk, điều phối phân bổ máy tại các địa điểm (\textit{location}), giám sát hiệu suất bán hàng của các hộc chứa và theo dõi báo cáo doanh thu, đối soát thanh toán (\textit{Payment})[cite: 29].
+Theo dõi mạng lưới kiosk tại các điểm đặt, giám sát tình trạng hoạt động và theo dõi báo cáo doanh thu, đối soát thanh toán.
 
 \subsection{Kỹ thuật viên (Technician)}
-Chịu trách nhiệm trực tiếp về phần cứng kiosk; tiếp nhận các cảnh báo sự cố kỹ thuật (\textit{Alert}), ghi nhận trạng thái kiểm tra, sửa chữa thiết bị vào phiếu bảo trì (\textit{MaintenanceRecord}) và cập nhật trạng thái vận hành của máy (\textit{Machine.status})[cite: 29].
+Tiếp nhận các cảnh báo sự cố phần cứng, kiểm tra, sửa chữa thiết bị kiosk và ghi nhận kết quả vào phiếu bảo trì.
 
 \subsection{Nhân viên kho (Inventory Staff)}
-Theo dõi dung tích còn lại (\textit{quantity}) của từng hộc chứa nước hoa (\textit{MachineSlot})[cite: 29]. Thực hiện nạp thêm nước hoa khi nhận cảnh báo sắp hết (\textit{LOW\_STOCK}), cập nhật phiếu bảo dưỡng định kỳ và ghi nhận chi tiết số lượng bổ sung vào nhật ký kho (\textit{InventoryLog})[cite: 29].
+Theo dõi dung tích nước hoa tại các hộc chứa và thực hiện nạp thêm (REFILL) khi nhận cảnh báo sắp hết hoặc hết hàng.
 
 \subsection{Khách hàng (Customer/Kiosk User)}
-Người dùng trực tiếp tại máy kiosk; thao tác xem thông tin nước hoa, quét mã QR thanh toán trải nghiệm và nhận lượt xịt nước hoa tự động tại vòi phun tương ứng[cite: 29].
+Xem thông tin nước hoa trực tiếp tại kiosk, quét mã thanh toán và nhận lượt xịt trải nghiệm tự động.
 
 }
 \section{Yêu cầu chức năng}
