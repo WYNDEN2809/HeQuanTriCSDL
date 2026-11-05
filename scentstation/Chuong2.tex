@@ -7,7 +7,7 @@
 Khách hàng chọn sản phẩm nước hoa trên màn hình kiosk, hệ thống kiểm tra hộc chứa tương ứng ở trạng thái sẵn sàng (AVAILABLE) và tạo đơn hàng (Orders) kèm mã QR. Sau khi thanh toán thành công (Payment chuyển SUCCESS, đơn hàng thành PAID), máy kích hoạt lệnh xịt (DispenseTransaction chuyển DISPENSED), trừ tồn kho và ghi nhật ký (InventoryLog).
 
 \subsection{Nghiệp vụ quản lý vận hành}
-Hệ thống giám sát kết nối thiết bị định kỳ (last_seen_at) và ghi nhận sự kiện phần cứng (DeviceEvent). Khi hộc chứa sắp hết (LOW_STOCK), cạn dung dịch (EMPTY) hoặc phát sinh lỗi xịt (DISPENSE_FAILED), hệ thống tự động tạo cảnh báo (Alert) để kỹ thuật viên tiếp nhận và xử lý qua phiếu bảo trì (MaintenanceRecord).
+Hệ thống giám sát kết nối thiết bị định kỳ (last\_seen\_at) và ghi nhận sự kiện phần cứng (DeviceEvent). Khi hộc chứa sắp hết (LOW\_STOCK), cạn dung dịch (EMPTY) hoặc phát sinh lỗi xịt (DISPENSE\_FAILED), hệ thống tự động tạo cảnh báo (Alert) để kỹ thuật viên tiếp nhận và xử lý qua phiếu bảo trì (MaintenanceRecord).
 
 \section{Các tác nhân và vai trò}
 
