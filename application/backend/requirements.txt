@@ -1,0 +1,5 @@
+# Python 3.10 - 3.12 (Django 4.2 LTS chua ho tro Python 3.13)
+Django>=4.2,<4.3
+mssql-django>=1.5,<2.0
+pyodbc>=5.0
+python-dotenv>=1.0
