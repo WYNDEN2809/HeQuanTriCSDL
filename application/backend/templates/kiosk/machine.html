@@ -1,0 +1,67 @@
+{% extends "kiosk/base.html" %}
+{% load humanize %}
+{% block title %}{{ machine.name }} - ScentStation{% endblock %}
+{% block topright %}{{ machine.name }} · {{ machine.location.name }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">Chọn mùi hương của bạn</h2>
+<p class="text-secondary mb-4">{{ machine.brand.name }} · mỗi lượt trải nghiệm gồm <b>một lần xịt</b>.</p>
+
+{% if not ready %}
+<div class="alert alert-warning fs-5"><i class="bi bi-exclamation-triangle"></i>
+  Máy tạm ngừng phục vụ (mất kết nối hoặc đang bảo trì). Vui lòng chọn máy khác.</div>
+{% endif %}
+
+<div class="row g-3">
+  {% for s in slots %}
+  <div class="col-md-6 col-lg-3">
+    <div class="slot-card p-4 h-100 d-flex flex-column {% if not s.orderable %}disabled{% endif %}">
+      <div class="small text-secondary">Slot {{ s.slot_number }}</div>
+      <div class="fs-4 gold">{{ s.perfume.name }}</div>
+      <div class="text-secondary small flex-grow-1 my-2">{{ s.perfume.description|default:"" }}</div>
+      <div class="price mb-3">{{ s.price_per_spray|floatformat:0|intcomma }} ₫</div>
+      {% if s.orderable %}
+      <button class="btn btn-gold w-100 btn-pick" data-slot="{{ s.id }}" data-name="{{ s.perfume.name }}"
+              data-price="{{ s.price_per_spray|floatformat:0|intcomma }}">Chọn mùi này</button>
+      {% else %}
+      <button class="btn btn-gold w-100" disabled>{% if s.status == 'EMPTY' or s.quantity <= 0 %}Hết hàng{% else %}Tạm ngưng{% endif %}</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Xac nhan truoc khi tao don -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light">
+      <form method="post" action="{% url 'kiosk_create_order' machine.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="slot_id" id="slotInput">
+        <div class="modal-body p-4 text-center">
+          <div class="text-secondary">Bạn đã chọn</div>
+          <div class="fs-2 gold" id="confName"></div>
+          <div class="price my-2"><span id="confPrice"></span> ₫ / 1 lần xịt</div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="button" class="btn btn-outline-light w-50" data-bs-dismiss="modal">Chọn lại</button>
+            <button type="submit" class="btn btn-gold w-50">Xác nhận &amp; thanh toán</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  document.querySelectorAll('.btn-pick').forEach(b => b.addEventListener('click', () => {
+    document.getElementById('slotInput').value = b.dataset.slot;
+    document.getElementById('confName').textContent = b.dataset.name;
+    document.getElementById('confPrice').textContent = b.dataset.price;
+    modal.show();
+  }));
+  // Tu lam moi man hinh sau thoi gian khong thao tac (cap nhat tinh trang slot)
+  let idle; const reset = () => { clearTimeout(idle); idle = setTimeout(() => location.reload(), {{ idle_seconds }} * 1000); };
+  ['click','touchstart','mousemove'].forEach(e => document.addEventListener(e, reset)); reset();
+</script>
+{% endblock %}
