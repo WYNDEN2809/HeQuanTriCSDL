@@ -1,0 +1,17 @@
+{% extends "kiosk/base.html" %}
+{% block title %}Kết quả thanh toán{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-6 col-lg-5 text-center">
+  <div class="slot-card p-5">
+    {% if ok %}
+      <div class="display-4 text-success"><i class="bi bi-check-circle"></i></div>
+      <h3 class="mt-2">Thanh toán thành công</h3>
+      <p class="text-secondary">Hãy quay lại màn hình kiosk để nhận mùi hương.</p>
+    {% else %}
+      <div class="display-4 text-warning"><i class="bi bi-exclamation-circle"></i></div>
+      <h3 class="mt-2">Thanh toán chưa hoàn tất</h3>
+    {% endif %}
+    <div class="small text-secondary mt-3">Kết quả xử lý: <code>{{ result }}</code> · Mã {{ order.payment_reference }}</div>
+  </div>
+</div></div>
+{% endblock %}
