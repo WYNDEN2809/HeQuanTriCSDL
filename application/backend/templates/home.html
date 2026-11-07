@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Tổng quan - ScentStation{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Tổng quan
+    {% if request.active_brand %}<small class="text-muted">- {{ request.active_brand.name }}</small>
+    {% elif user.is_platform_admin %}<small class="text-muted">- toàn nền tảng</small>{% endif %}
+  </h4>
+</div>
+
+{% if not request.active_brand_id and not user.is_platform_admin %}
+<div class="alert alert-warning">Tài khoản của bạn chưa thuộc thương hiệu nào nên chưa có dữ liệu để hiển thị.</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="card stat-card shadow-sm h-100"><div class="card-body">
+    <div class="text-muted small">Máy kiosk</div><div class="display-6">{{ machine_total|intcomma }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card shadow-sm h-100"><div class="card-body">
+    <div class="text-muted small">Đơn hàng</div><div class="display-6">{{ order_total|intcomma }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card shadow-sm h-100"><div class="card-body">
+    <div class="text-muted small">Doanh thu (đơn đã xịt)</div><div class="display-6">{{ revenue|intcomma }}<small class="fs-6"> ₫</small></div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card shadow-sm h-100 border-danger"><div class="card-body">
+    <div class="text-muted small">Đã trả tiền nhưng xịt lỗi / cần review</div><div class="display-6 text-danger">{{ problem_orders|intcomma }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card shadow-sm h-100"><div class="card-body">
+    <div class="text-muted small">Cảnh báo chưa xử lý</div><div class="display-6">{{ open_alerts|intcomma }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card stat-card shadow-sm h-100"><div class="card-body">
+    <div class="text-muted small">Slot sắp hết / hết nước hoa</div><div class="display-6">{{ low_stock_slots|intcomma }}</div></div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm"><div class="card-header">Máy theo trạng thái</div>
+      <ul class="list-group list-group-flush">
+        {% for s in machine_status %}<li class="list-group-item d-flex justify-content-between">{{ s.status }}<span class="badge text-bg-dark">{{ s.n }}</span></li>
+        {% empty %}<li class="list-group-item text-muted">Chưa có dữ liệu</li>{% endfor %}
+      </ul></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm"><div class="card-header">Đơn hàng theo trạng thái</div>
+      <ul class="list-group list-group-flush">
+        {% for s in order_status %}<li class="list-group-item d-flex justify-content-between">{{ s.status }}<span class="badge text-bg-dark">{{ s.n|intcomma }}</span></li>
+        {% empty %}<li class="list-group-item text-muted">Chưa có dữ liệu</li>{% endfor %}
+      </ul></div>
+  </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+  <div class="card-header">Đơn hàng gần đây (tải lại trang để cập nhật)</div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle mb-0">
+      <thead><tr><th>Mã đơn</th><th>Thời gian</th><th>Máy</th><th>Mùi hương</th><th class="text-end">Số tiền</th><th>Trạng thái</th></tr></thead>
+      <tbody>
+      {% for o in recent_orders %}
+        <tr>
+          <td><code>{{ o.payment_reference }}</code></td>
+          <td>{{ o.created_at|date:"d/m H:i:s" }}</td>
+          <td>{{ o.machine_slot.machine.name }}</td>
+          <td>{{ o.perfume.name }}</td>
+          <td class="text-end">{{ o.amount|floatformat:0|intcomma }}</td>
+          <td><span class="badge text-bg-{% if o.status == 'DISPENSED' %}success{% elif o.status == 'PENDING' %}info{% elif o.status == 'DISPENSE_FAILED' or o.status == 'REVIEW' or o.status == 'FAILED' %}danger{% else %}secondary{% endif %}">{{ o.status }}</span></td>
+        </tr>
+      {% empty %}<tr><td colspan="6" class="text-muted">Chưa có đơn hàng</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
