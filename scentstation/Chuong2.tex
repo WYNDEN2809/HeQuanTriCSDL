@@ -417,8 +417,37 @@ Xem thông tin nước hoa trực tiếp tại kiosk, quét mã thanh toán và 
 \end{enumerate}
 
 \section{Biểu đồ hoạt động}
+
 \subsection{Luồng thanh toán thành công}
+
+Khách chọn mùi, xem thông tin sản phẩm. Nếu khách hàng chọn mua hệ thống sẽ kiểm tra máy, khe trước khi tạo đơn và xuất mã QR.
+
+Khi khách thanh toán, hệ thống backend sẽ kiểm tra xác minh thông báo từ cổng gồm chữ ký, mã tham số, số tiền, thời gian. Nếu hợp lệ sẽ ghi nhận là thành công, nhưng vẫn sẽ kiểm tra lại điều kiện an toàn rồi mới tạo lệnh phun (duy nhất). Sau khi phun thành công, chuyển đơn hàng thành dispensed, ghi nhật kí, trừ lượng đã phun và cập nhật trạng thái. Máy gửi thông báo hoàn tất cho khách.
+
 \subsection{Luồng thanh toán thất bại hoặc hết hạn}
-\subsection{Luồng khe chứa hết nước hoa}
-\subsection{Luồng thanh toán thành công nhưng cấp phát lỗi}
+
+Khi cổng xác nhận fail, hệ thống ghi nhận kết quả và thông báo cho khách. Đơn chỉ đóng ở trạng thái fail khi không còn phiên thanh toán hợp lệ khác.
+
+Với trường hợp đơn quá hạn, hệ thống rà soát
+
+\begin{itemize}
+    \item Nếu chưa nhận được tiền, đơn chuyển sang trạng thái hết hạn và không tạo lệnh phun
+    \item Chưa có phản hồi không có nghĩa thanh toán thất bại. Nếu tiền đến sau khi đơn đóng hoặc kết quả chưa rõ; phải được rà soát lại, không tự phun. Khách sẽ thử lại sau khi rà soát.
+\end{itemize}
+
+\subsection{Luồng hết nước hoa}
+
+Sau mỗi lần phun thành công hoặc nạp lại, hệ thống cập nhật lượng còn và trạng thái khe ngay. Nếu không đủ một lần phun an toàn, khe chuyển sang hết, khóa lại không cho khách mua.
+
+Khe đang DISABLED vẫn giữ khóa. Trước khi tạo đơn, hệ thống kiểm tra lại để tránh sử dụng dữ liệu cũ.
+
+Hệ thống đồng thời báo nhân viên kho nạp lại và ghi nhận thao tác. Khách có thể chọn mùi khác.
+
+\subsection{Luồng thanh toán thành công nhưng không cấp phát}
+
+Khi đã thu tiền nhưng máy không an toàn hoặc đơn đã có lệnh, hệ thống không tạo thêm lệnh mà kiểm tra tình trạng hiện tại
+
+Nếu máy báo fail, hệ thống ghi nhận là lỗi và thông báo khách chờ xử lý mà payment là thành công. Nếu chưa rõ máy đã phun hay chưa, giao dịch sẽ được kiểm tra lại, không tự phun lần hai.
+
+Quản lý vận hành đối chiếu thanh toán và kết quả thiết bị. Khi xác nhận đã thu tiền nhưng chưa phục vụ, giao dịch được xem xét và sẽ được hoàn theo chính sách. Hệ thống chỉ ghi nhận hoàn thành công sau xác nhận từ cổng; khách không phải thanh toán lại.
 \section{Tổng kết chương}
