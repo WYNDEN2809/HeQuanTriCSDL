@@ -160,13 +160,262 @@ Xem thông tin nước hoa trực tiếp tại kiosk, quét mã thanh toán và 
   \caption{Biểu đồ Use Case tổng quát}
   \label{fig:usecase_tongquat}
 \end{figure}
+
 \section{Đặc tả Use Case tiêu biểu}
+
 \subsection{UC-01: Xem và chọn nước hoa}
+
+\begin{description}[leftmargin=3.5cm,style=nextline]
+    \item[Mã Use Case:] UC-01
+    \item[Tên Use Case:] Xem và chọn nước hoa
+    \item[Tác nhân chính:] Customer / Kiosk User
+    \item[Tác nhân liên quan:] Hệ thống ScentStation
+    \item[Mục tiêu:] Cho phép khách hàng xem danh sách, thông tin nước hoa và lựa chọn sản phẩm muốn trải nghiệm.
+    \item[Tiền điều kiện:]
+    \begin{itemize}
+        \item Kiosk đang hoạt động và có kết nối với hệ thống.
+        \item Danh sách sản phẩm nước hoa đã được cập nhật.
+    \end{itemize}
+    \item[Hậu điều kiện:]
+    \begin{itemize}
+        \item Sản phẩm được khách hàng lựa chọn.
+        \item Thông tin sản phẩm được chuyển sang bước xác nhận đơn trải nghiệm.
+    \end{itemize}
+\end{description}
+
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Khách hàng truy cập giao diện kiosk.
+    \item Hệ thống hiển thị danh sách nước hoa đang được cung cấp.
+    \item Khách hàng xem thông tin chi tiết của một sản phẩm, bao gồm tên, thương hiệu, mô tả và giá trải nghiệm.
+    \item Khách hàng lựa chọn sản phẩm muốn trải nghiệm.
+    \item Hệ thống kiểm tra trạng thái hoạt động và khả năng cung cấp của sản phẩm.
+    \item Hệ thống hiển thị thông tin sản phẩm đã chọn để khách hàng xác nhận.
+\end{enumerate}
+
+\textbf{Luồng ngoại lệ:}
+\begin{enumerate}[label=\arabic{enumi}a*.]
+    \item Nếu sản phẩm không còn khả dụng, hệ thống thông báo và yêu cầu khách hàng lựa chọn sản phẩm khác.
+    \item Nếu không tải được danh sách sản phẩm, hệ thống thông báo lỗi và cho phép khách hàng thử tải lại.
+\end{enumerate}
+
 \subsection{UC-02: Tạo đơn trải nghiệm}
+
+\begin{description}[leftmargin=3.5cm,style=nextline]
+    \item[Mã Use Case:] UC-02
+    \item[Tên Use Case:] Tạo đơn trải nghiệm
+    \item[Tác nhân chính:] Customer / Kiosk User
+    \item[Tác nhân liên quan:] Hệ thống ScentStation
+    \item[Mục tiêu:] Tạo đơn hàng cho sản phẩm nước hoa mà khách hàng đã lựa chọn và cung cấp mã QR phục vụ thanh toán.
+    \item[Tiền điều kiện:]
+    \begin{itemize}
+        \item Khách hàng đã lựa chọn sản phẩm nước hoa.
+        \item Sản phẩm và khe chứa tương ứng đang khả dụng.
+    \end{itemize}
+    \item[Hậu điều kiện:]
+    \begin{itemize}
+        \item Đơn trải nghiệm được tạo và lưu vào hệ thống.
+        \item Mã QR thanh toán được tạo hoặc cung cấp cho khách hàng.
+        \item Đơn hàng ở trạng thái chờ thanh toán.
+    \end{itemize}
+\end{description}
+
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Khách hàng xác nhận sản phẩm nước hoa đã chọn.
+    \item Hệ thống tiếp nhận yêu cầu tạo đơn trải nghiệm.
+    \item Hệ thống kiểm tra lại thông tin sản phẩm, giá và khả năng cung cấp.
+    \item Hệ thống xác định máy và khe chứa phù hợp.
+    \item Hệ thống tạo đơn hàng với thông tin sản phẩm, giá và mã định danh đơn hàng.
+    \item Hệ thống tạo mã QR thanh toán tương ứng với đơn hàng.
+    \item Hệ thống hiển thị thông tin đơn hàng và mã QR cho khách hàng.
+\end{enumerate}
+
+\textbf{Luồng ngoại lệ:}
+\begin{enumerate}[label=\arabic{enumi}a*.]
+    \item Nếu sản phẩm hoặc khe chứa không còn khả dụng, hệ thống thông báo và yêu cầu khách hàng chọn sản phẩm khác.
+    \item Nếu không thể tạo đơn hàng, hệ thống thông báo lỗi và không chuyển sang bước thanh toán.
+    \item Nếu không thể tạo mã QR, hệ thống thông báo lỗi và giữ đơn hàng ở trạng thái chưa hoàn tất thanh toán hoặc xử lý theo quy tắc hủy đơn.
+\end{enumerate}
+
 \subsection{UC-03: Thanh toán đơn hàng}
+
+\begin{description}[leftmargin=3.5cm,style=nextline]
+    \item[Mã Use Case:] UC-03
+    \item[Tên Use Case:] Thanh toán đơn hàng
+    \item[Tác nhân chính:] Customer / Kiosk User
+    \item[Tác nhân phụ:] Payment Provider (External)
+    \item[Tác nhân liên quan:] Hệ thống ScentStation
+    \item[Mục tiêu:] Xác minh và ghi nhận kết quả thanh toán cho đơn trải nghiệm thông qua mã QR.
+    \item[Tiền điều kiện:]
+    \begin{itemize}
+        \item Đơn hàng đã được tạo.
+        \item Mã QR thanh toán hợp lệ và đơn hàng đang chờ thanh toán.
+        \item Hệ thống có khả năng kết nối với đơn vị cung cấp dịch vụ thanh toán.
+    \end{itemize}
+    \item[Hậu điều kiện:]
+    \begin{itemize}
+        \item Nếu thanh toán thành công, đơn hàng được cập nhật trạng thái đã thanh toán và đủ điều kiện chuyển sang cấp phát.
+        \item Nếu thanh toán thất bại hoặc hết hạn, đơn hàng không được phép cấp phát nước hoa.
+        \item Kết quả thanh toán được lưu lại để tra cứu và đối soát.
+    \end{itemize}
+\end{description}
+
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Khách hàng quét mã QR được hiển thị trên kiosk.
+    \item Khách hàng thực hiện thanh toán thông qua Payment Provider.
+    \item Payment Provider xử lý giao dịch và gửi thông tin kết quả thanh toán về hệ thống thông qua webhook.
+    \item Hệ thống tiếp nhận thông tin thanh toán.
+    \item Hệ thống xác minh tính hợp lệ của thông tin, bao gồm chữ ký, số tiền và mã định danh giao dịch.
+    \item Hệ thống kiểm tra tính duy nhất của giao dịch để tránh ghi nhận thanh toán trùng lặp.
+    \item Nếu thông tin hợp lệ và thanh toán thành công, hệ thống cập nhật trạng thái đơn hàng thành đã thanh toán.
+    \item Hệ thống thông báo kết quả thanh toán cho khách hàng và chuyển đơn hàng sang bước cấp phát.
+\end{enumerate}
+
+\textbf{Luồng ngoại lệ:}
+\begin{enumerate}[label=\arabic{enumi}a*.]
+    \item Nếu khách hàng thanh toán thất bại, hệ thống ghi nhận kết quả thất bại và thông báo cho khách hàng.
+    \item Nếu mã QR hết hạn, hệ thống thông báo giao dịch đã hết hạn và không cho phép cấp phát.
+    \item Nếu chữ ký, số tiền hoặc mã giao dịch không hợp lệ, hệ thống từ chối ghi nhận kết quả thanh toán.
+    \item Nếu webhook được gửi nhiều lần, hệ thống chỉ ghi nhận giao dịch hợp lệ một lần và không tạo thêm yêu cầu cấp phát.
+    \item Nếu không nhận được kết quả từ Payment Provider, đơn hàng tiếp tục ở trạng thái chờ xác minh cho đến khi có kết quả phù hợp.
+\end{enumerate}
+
 \subsection{UC-04: Cấp phát một lần xịt}
+
+\begin{description}[leftmargin=3.5cm,style=nextline]
+    \item[Mã Use Case:] UC-04
+    \item[Tên Use Case:] Cấp phát một lần xịt
+    \item[Tác nhân chính:] Customer / Kiosk User
+    \item[Tác nhân phụ:] IoT Machine / Kiosk Device (External)
+    \item[Tác nhân liên quan:] Hệ thống ScentStation
+    \item[Mục tiêu:] Điều khiển máy thực hiện đúng một lần xịt nước hoa sau khi đơn hàng được xác nhận thanh toán thành công, đồng thời ghi nhận kết quả thực hiện.
+    \item[Tiền điều kiện:]
+    \begin{itemize}
+        \item Đơn hàng đã được xác nhận thanh toán thành công.
+        \item Máy đang hoạt động và có kết nối hoặc khả năng nhận lệnh.
+        \item Khe chứa được chỉ định có đủ nước hoa và không ở trạng thái lỗi.
+        \item Đơn hàng chưa được cấp phát thành công trước đó.
+    \end{itemize}
+    \item[Hậu điều kiện:]
+    \begin{itemize}
+        \item Nếu cấp phát thành công, kết quả được lưu lại và tồn kho được cập nhật theo kết quả xịt.
+        \item Nếu cấp phát thất bại, hệ thống lưu nhận trạng thái lỗi để xử lý.
+        \item Một đơn hàng không được thực hiện cấp phát thành công nhiều hơn một lần.
+    \end{itemize}
+\end{description}
+
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Sau khi xác nhận thanh toán thành công, hệ thống kiểm tra trạng thái đơn hàng.
+    \item Hệ thống kiểm tra trạng thái hoạt động của máy và khe chứa nước hoa.
+    \item Hệ thống tạo lệnh cấp phát với mã định danh duy nhất để chống xử lý trùng lặp.
+    \item Hệ thống gửi lệnh đến IoT Machine / Kiosk Device.
+    \item Thiết bị tiếp nhận và kiểm tra lệnh.
+    \item Thiết bị thực hiện đúng một lần xịt nước hoa.
+    \item Thiết bị gửi kết quả thực hiện về hệ thống.
+    \item Hệ thống xác nhận kết quả, cập nhật trạng thái cấp phát và trừ tồn kho tương ứng.
+    \item Hệ thống thông báo kết quả trải nghiệm cho khách hàng.
+\end{enumerate}
+
+\textbf{Luồng ngoại lệ:}
+\begin{enumerate}[label=\arabic{enumi}a*.]
+    \item Nếu máy ngoại tuyến hoặc không phản hồi, hệ thống ghi nhận trạng thái lỗi và thông báo cho khách hàng.
+    \item Nếu khe chứa hết nước hoa hoặc không khả dụng, hệ thống từ chối gửi lệnh cấp phát.
+    \item Nếu thiết bị báo lỗi trong quá trình xịt, hệ thống ghi nhận kết quả thất bại để xử lý.
+    \item Nếu không nhận được phản hồi xác định từ thiết bị, hệ thống chuyển giao dịch sang trạng thái cần kiểm tra thủ công, không tự động gửi lại lệnh xịt khi chưa xác định kết quả trước đó.
+    \item Nếu nhận được cùng một lệnh nhiều lần, hệ thống hoặc thiết bị sử dụng mã định danh lệnh để ngăn việc thực hiện xịt trùng.
+\end{enumerate}
+
 \subsection{UC-05: Quản lý máy và khe chứa}
+
+\begin{description}[leftmargin=3.5cm,style=nextline]
+    \item[Mã Use Case:] UC-05
+    \item[Tên Use Case:] Quản lý máy và khe chứa
+    \item[Tác nhân chính:] Brand Administrator
+    \item[Tác nhân liên quan:] Operations Manager, Hệ thống ScentStation
+    \item[Mục tiêu:] Cho phép quản trị viên quản lý thông tin máy, vị trí lắp đặt, cấu hình khe chứa và theo dõi trạng thái hoạt động của thiết bị.
+    \item[Tiền điều kiện:]
+    \begin{itemize}
+        \item Người dùng đã đăng nhập và có quyền quản lý máy.
+        \item Thương hiệu đã được thiết lập trên hệ thống.
+    \end{itemize}
+    \item[Hậu điều kiện:]
+    \begin{itemize}
+        \item Thông tin máy và khe chứa được cập nhật trong hệ thống.
+        \item Các thay đổi được lưu lại và có thể truy xuất lịch sử.
+        \item Trạng thái máy và khe chứa được hiển thị cho người có quyền.
+    \end{itemize}
+\end{description}
+
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Brand Administrator đăng nhập vào hệ thống quản trị.
+    \item Người dùng truy cập chức năng quản lý máy và khe chứa.
+    \item Hệ thống hiển thị danh sách máy thuộc phạm vi thương hiệu được phép quản lý.
+    \item Người dùng chọn một máy để xem thông tin chi tiết.
+    \item Hệ thống hiển thị thông tin máy, vị trí lắp đặt, trạng thái kết nối và danh sách khe chứa.
+    \item Người dùng thực hiện một trong các thao tác: thêm máy, cập nhật thông tin máy, cấu hình khe chứa hoặc thay đổi thông tin sản phẩm được gán cho khe.
+    \item Hệ thống kiểm tra tính hợp lệ của dữ liệu và quyền thao tác.
+    \item Hệ thống lưu thông tin sau khi kiểm tra thành công.
+    \item Operations Manager có thể theo dõi trạng thái máy, khe chứa và thực hiện thao tác bật/tắt từ xa nếu được cấp quyền.
+    \item Hệ thống ghi nhận các thay đổi quan trọng vào audit log.
+\end{enumerate}
+
+\textbf{Luồng ngoại lệ:}
+\begin{enumerate}[label=\arabic{enumi}a*.]
+    \item Nếu người dùng không có quyền truy cập máy, hệ thống từ chối thao tác.
+    \item Nếu thông tin cấu hình không hợp lệ hoặc bị trùng lặp, hệ thống thông báo lỗi và yêu cầu điều chỉnh.
+    \item Nếu máy ngoại tuyến, hệ thống vẫn hiển thị trạng thái gần nhất và thông báo không thể thực hiện thao tác điều khiển từ xa.
+    \item Nếu thao tác cập nhật thất bại, hệ thống không ghi nhận thay đổi và thông báo kết quả cho người dùng.
+\end{enumerate}
+
 \subsection{UC-06: Theo dõi tồn kho và cảnh báo}
+
+\begin{description}[leftmargin=3.5cm,style=nextline]
+    \item[Mã Use Case:] UC-06
+    \item[Tên Use Case:] Theo dõi tồn kho và cảnh báo
+    \item[Tác nhân chính:] Inventory Staff
+    \item[Tác nhân liên quan:] Operations Manager, Hệ thống ScentStation, IoT Machine / Kiosk Device
+    \item[Mục tiêu:] Theo dõi lượng nước hoa trong kho và tại các khe chứa, ghi nhận hoạt động nhập hoặc thay thế chai nước hoa, đồng thời hỗ trợ phát hiện và xử lý các cảnh báo vận hành.
+    \item[Tiền điều kiện:]
+    \begin{itemize}
+        \item Người dùng đã đăng nhập và có quyền quản lý kho hoặc theo dõi cảnh báo.
+        \item Thông tin sản phẩm, máy và khe chứa đã tồn tại trên hệ thống.
+    \end{itemize}
+    \item[Hậu điều kiện:]
+    \begin{itemize}
+        \item Thông tin tồn kho và các lần điều chỉnh được lưu lại.
+        \item Lịch sử nhập, thay thế và đối soát tồn kho có thể được tra cứu.
+        \item Các cảnh báo được ghi nhận và hiển thị cho người có trách nhiệm xử lý.
+    \end{itemize}
+\end{description}
+
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Inventory Staff đăng nhập vào hệ thống.
+    \item Người dùng truy cập chức năng quản lý kho nước hoa.
+    \item Hệ thống hiển thị danh sách sản phẩm, lượng tồn kho và tình trạng nước hoa tại các khe chứa.
+    \item Người dùng thực hiện đăng ký chai hoặc cartridge mới, ghi nhận việc lắp đặt hoặc thay thế chai vào khe chứa.
+    \item Hệ thống kiểm tra thông tin sản phẩm, máy, khe chứa và số lượng được cập nhật.
+    \item Hệ thống lưu thông tin nhập kho hoặc thay thế.
+    \item Hệ thống tiếp nhận dữ liệu kết quả xịt từ thiết bị và cập nhật lượng tồn kho tương ứng.
+    \item Hệ thống kiểm tra các điều kiện cảnh báo như tồn kho thấp, khe chứa rỗng, máy ngoại tuyến hoặc trạng thái bất thường.
+    \item Nếu phát hiện vấn đề, hệ thống tạo cảnh báo và thông báo đến Operations Manager hoặc người phụ trách.
+    \item Inventory Staff có thể thực hiện đối soát tồn kho, điều chỉnh số lượng kèm lý do và xem lịch sử hoặc báo cáo tồn kho.
+    \item Operations Manager theo dõi cảnh báo, xác nhận và xử lý hoặc phân công ticket bảo trì khi cần thiết.
+\end{enumerate}
+
+\textbf{Luồng ngoại lệ:}
+\begin{enumerate}[label=\arabic{enumi}a*.]
+    \item Nếu thông tin chai hoặc cartridge không hợp lệ, hệ thống từ chối ghi nhận.
+    \item Nếu số lượng điều chỉnh không hợp lệ, hệ thống thông báo lỗi và yêu cầu nhập lại.
+    \item Nếu dữ liệu từ thiết bị không đầy đủ hoặc không xác định được kết quả xịt, hệ thống không tự ý điều chỉnh tồn kho và ghi nhận để kiểm tra.
+    \item Nếu phát hiện tồn kho thấp hoặc khe chứa rỗng, hệ thống tạo cảnh báo để người phụ trách xử lý.
+    \item Nếu không thể đồng bộ dữ liệu từ thiết bị, hệ thống ghi nhận tình trạng chưa đồng bộ và tiếp tục xử lý khi có dữ liệu hợp lệ.
+\end{enumerate}
+
 \section{Biểu đồ hoạt động}
 \subsection{Luồng thanh toán thành công}
 \subsection{Luồng thanh toán thất bại hoặc hết hạn}
