@@ -1,0 +1,68 @@
+{% extends "kiosk/base.html" %}
+{% load humanize %}
+{% block title %}Thanh toán - ScentStation{% endblock %}
+{% block topright %}{{ machine.name }} · Mã đơn {{ order.payment_reference }}{% endblock %}
+{% block content %}
+<div class="row g-4 align-items-center">
+  <div class="col-lg-5 text-center">
+    <div id="qrSection">
+      <div class="qr-box"><div id="qrcode"></div></div>
+      {% if pay_url %}
+      <div class="mt-3 small text-secondary">Chế độ demo: <a class="gold" target="_blank" href="{{ pay_url }}">mở trang thanh toán giả lập</a></div>
+      {% endif %}
+      <div class="mt-2 text-secondary">Còn lại: <b id="countdown" class="gold">--:--</b></div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="slot-card p-4">
+      <div class="text-secondary small">Mùi hương đã chọn</div>
+      <div class="fs-3 gold">{{ order.perfume.name }}</div>
+      <div class="price mb-3">{{ order.amount|floatformat:0|intcomma }} ₫</div>
+      <div id="statusBox" class="alert alert-info fs-5 mb-3">
+        <div class="fw-bold" id="statusTitle">Đang tải...</div>
+        <div id="statusMsg"></div>
+      </div>
+      <div class="d-flex gap-2">
+        <form method="post" action="{% url 'kiosk_cancel_order' order.payment_reference %}" id="cancelForm">
+          {% csrf_token %}
+          <button class="btn btn-outline-light">Hủy đơn</button>
+        </form>
+        <a class="btn btn-gold d-none" id="backBtn" href="{% url 'kiosk_machine' machine.id %}">Về màn hình chính</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+  const statusUrl = "{% url 'kiosk_order_status' order.payment_reference %}";
+  const machineUrl = "{% url 'kiosk_machine' machine.id %}";
+  const payUrl = "{{ pay_url }}";
+  if (payUrl) new QRCode(document.getElementById('qrcode'), {text: payUrl, width: 240, height: 240});
+  else document.getElementById('qrcode').textContent = "{{ order.payment_reference }}";
+
+  let finished = false, left = 0;
+  const fmt = s => String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+
+  async function poll() {
+    try {
+      const d = await (await fetch(statusUrl, {cache: 'no-store'})).json();
+      document.getElementById('statusTitle').textContent = d.title;
+      document.getElementById('statusMsg').textContent = d.message;
+      document.getElementById('statusBox').className = 'alert fs-5 mb-3 alert-' + d.tone;
+      document.getElementById('qrSection').style.visibility = d.stage === 'WAITING_PAYMENT' ? 'visible' : 'hidden';
+      document.getElementById('cancelForm').style.display = d.stage === 'WAITING_PAYMENT' ? 'block' : 'none';
+      left = d.expires_in;
+      if (d.final && !finished) {
+        finished = true;
+        document.getElementById('backBtn').classList.remove('d-none');
+        setTimeout(() => location.href = machineUrl, 20000);   // tu ve man hinh chinh
+      }
+    } catch (e) {}
+    if (!finished) setTimeout(poll, 1500);
+  }
+  setInterval(() => { if (left > 0) left--; document.getElementById('countdown').textContent = fmt(left); }, 1000);
+  poll();
+</script>
+{% endblock %}

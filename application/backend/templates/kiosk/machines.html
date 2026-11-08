@@ -1,0 +1,25 @@
+{% extends "kiosk/base.html" %}
+{% block content %}
+<h2 class="mb-1">Chọn máy kiosk để demo</h2>
+<p class="text-secondary">Chỉ hiện các máy đang <b>online</b> (có heartbeat trong vài chục giây gần nhất). Thực tế mỗi máy kiosk mở thẳng trang của chính nó.</p>
+{% if not machines %}
+<div class="alert alert-warning fs-5">
+  Hiện chưa có máy nào online. Hãy mở một cửa sổ terminal khác và chạy:<br>
+  <code>python manage.py run_device_simulator</code>
+</div>
+{% endif %}
+<div class="row g-3">
+  {% for m in machines %}
+  <div class="col-md-4">
+    <a href="{% url 'kiosk_machine' m.id %}" class="text-decoration-none">
+      <div class="slot-card p-4 h-100">
+        <div class="gold small">{{ m.brand.name }}</div>
+        <div class="fs-4 text-light">{{ m.name }}</div>
+        <div class="text-secondary">{{ m.location.name }}</div>
+        <div class="mt-2 small text-secondary">{{ m.serial_number }}</div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
