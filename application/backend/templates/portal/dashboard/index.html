@@ -1,0 +1,76 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Báo cáo - ScentStation{% endblock %}
+{% block page_title %}Dashboard và báo cáo{% endblock %}
+{% block page_actions %}
+  <div class="dropdown"><button class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown">Xuất file</button>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li><a class="dropdown-item" href="{% url 'report_export' 'transactions' %}?{% qs format='csv' %}">Giao dịch (CSV)</a></li>
+      <li><a class="dropdown-item" href="{% url 'report_export' 'transactions' %}?{% qs format='xlsx' %}">Giao dịch (Excel)</a></li>
+      <li><a class="dropdown-item" href="{% url 'report_export' 'daily' %}?{% qs format='xlsx' %}">Tổng hợp theo ngày (Excel)</a></li>
+      <li><a class="dropdown-item" href="{% url 'report_export' 'perfumes' %}?{% qs format='csv' %}">Mùi hương bán chạy (CSV)</a></li>
+      <li><a class="dropdown-item" href="{% url 'report_export' 'machines' %}?{% qs format='csv' %}">Doanh thu theo máy (CSV)</a></li>
+    </ul></div>
+{% endblock %}
+{% block portal_content %}
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-2"><input type="date" class="form-control" name="from" value="{{ d_from }}"></div>
+  <div class="col-md-2"><input type="date" class="form-control" name="to" value="{{ d_to }}"></div>
+  <div class="col-md-2"><select class="form-select" name="location"><option value="">Mọi địa điểm</option>{% for l in locations %}<option value="{{ l.id }}" {% if l.id|stringformat:"s" == f.location %}selected{% endif %}>{{ l.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><select class="form-select" name="machine"><option value="">Mọi máy</option>{% for m in machines %}<option value="{{ m.id }}" {% if m.id|stringformat:"s" == f.machine %}selected{% endif %}>{{ m.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><select class="form-select" name="perfume"><option value="">Mọi mùi hương</option>{% for p in perfumes %}<option value="{{ p.id }}" {% if p.id|stringformat:"s" == f.perfume %}selected{% endif %}>{{ p.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><button class="btn btn-dark">Xem</button> <a class="btn btn-outline-secondary" href="?">Đặt lại</a></div>
+</form>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted small">Đơn hàng</div><div class="display-6">{{ orders_total|money }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted small">Doanh thu (đơn đã xịt)</div><div class="display-6">{{ revenue|money }}<small class="fs-6"> ₫</small></div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted small">Tỉ lệ xịt thành công</div><div class="display-6">{% if dispense_rate is not None %}{{ dispense_rate }}%{% else %}-{% endif %}</div><div class="small text-muted">{{ dispense_ok }} / {{ dispense_total }} lệnh</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100 border-danger"><div class="card-body"><div class="text-muted small">Đã trả tiền nhưng chưa xịt được</div><div class="display-6 text-danger">{{ unconfirmed|money }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted small">Thời gian xử lý cảnh báo TB</div><div class="display-6">{% if avg_resolution_h is not None %}{{ avg_resolution_h }}<small class="fs-6"> giờ</small>{% else %}-{% endif %}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted small">Uptime ước tính</div><div class="display-6">{% if uptime_pct is not None %}{{ uptime_pct }}%{% else %}-{% endif %}</div><div class="small text-muted">Downtime: {{ downtime_h }} giờ (từ cảnh báo mất kết nối)</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted small">Slot sắp hết / hết</div><div class="display-6">{{ low_slots }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm h-100"><div class="card-body"><div class="text-muted small">Máy theo trạng thái</div>{% for s in machine_status %}<span class="badge text-bg-{{ s.status|badge }}">{{ s.status }} {{ s.n }}</span> {% endfor %}</div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-8"><div class="card shadow-sm"><div class="card-header">Đơn hàng và doanh thu theo ngày</div><div class="card-body"><canvas id="dailyChart" height="110"></canvas></div></div></div>
+  <div class="col-lg-4"><div class="card shadow-sm"><div class="card-header">Mùi hương bán chạy</div><div class="card-body"><canvas id="perfumeChart" height="220"></canvas></div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card shadow-sm"><div class="card-header">Đơn theo trạng thái</div><ul class="list-group list-group-flush">
+    {% for s in status_rows %}<li class="list-group-item d-flex justify-content-between"><span class="badge text-bg-{{ s.status|badge }}">{{ s.status }}</span><b>{{ s.n|money }}</b></li>{% empty %}<li class="list-group-item text-muted">Không có dữ liệu</li>{% endfor %}</ul></div></div>
+  <div class="col-md-4"><div class="card shadow-sm"><div class="card-header">Doanh thu theo máy (top 10)</div><ul class="list-group list-group-flush">
+    {% for r in by_machine %}<li class="list-group-item d-flex justify-content-between"><span>{{ r.machine_slot__machine__name }}</span><b>{{ r.rev|money }}</b></li>{% empty %}<li class="list-group-item text-muted">Không có dữ liệu</li>{% endfor %}</ul></div></div>
+  <div class="col-md-4"><div class="card shadow-sm"><div class="card-header">Doanh thu theo địa điểm</div><ul class="list-group list-group-flush">
+    {% for r in by_location %}<li class="list-group-item d-flex justify-content-between"><span>{{ r.machine_slot__machine__location__name }}</span><b>{{ r.rev|money }}</b></li>{% empty %}<li class="list-group-item text-muted">Không có dữ liệu</li>{% endfor %}</ul></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Cảnh báo trong kỳ theo loại</div><ul class="list-group list-group-flush">
+    {% for r in alert_types %}<li class="list-group-item d-flex justify-content-between"><span>{{ r.alert_type }}</span><b>{{ r.n }}</b></li>{% empty %}<li class="list-group-item text-muted">Không có cảnh báo</li>{% endfor %}</ul></div></div>
+  <div class="col-md-6"><div class="card shadow-sm border-danger"><div class="card-header">Cảnh báo nghiêm trọng đang mở</div><ul class="list-group list-group-flush">
+    {% for a in critical_open %}<li class="list-group-item d-flex justify-content-between"><a href="{% url 'alert_detail' a.id %}">{{ a.machine.name }} - {{ a.alert_type }}</a><span class="text-muted small">{{ a.created_at|date:"d/m H:i" }}</span></li>{% empty %}<li class="list-group-item text-muted">Không có</li>{% endfor %}</ul></div></div>
+  {% if platform_brands %}
+  <div class="col-12"><div class="card shadow-sm"><div class="card-header">Toàn nền tảng: doanh thu theo thương hiệu (chỉ Super Admin)</div><ul class="list-group list-group-flush">
+    {% for r in platform_brands %}<li class="list-group-item d-flex justify-content-between"><span>{{ r.machine_slot__machine__brand__name }}</span><span>{{ r.n|money }} lượt · <b>{{ r.rev|money }} ₫</b></span></li>{% endfor %}</ul></div></div>
+  {% endif %}
+</div>
+{{ chart|json_script:"chart-data" }}
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  const c = JSON.parse(document.getElementById('chart-data').textContent);
+  new Chart(document.getElementById('dailyChart'), {
+    data: { labels: c.labels, datasets: [
+      { type: 'bar', label: 'Số đơn', data: c.orders, yAxisID: 'y', backgroundColor: '#adb5bd' },
+      { type: 'line', label: 'Doanh thu (₫)', data: c.revenue, yAxisID: 'y1', borderColor: '#198754', tension: .2 } ] },
+    options: { scales: { y: { beginAtZero: true }, y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } } } }
+  });
+  new Chart(document.getElementById('perfumeChart'), {
+    type: 'doughnut', data: { labels: c.perfume_labels, datasets: [{ data: c.perfume_counts }] }
+  });
+</script>
+{% endblock %}
