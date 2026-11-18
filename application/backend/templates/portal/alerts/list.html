@@ -1,0 +1,31 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Cảnh báo - ScentStation{% endblock %}
+{% block page_title %}Cảnh báo{% endblock %}
+{% block portal_content %}
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <a class="badge text-bg-dark text-decoration-none fs-6" href="?status=active">Đang mở</a>
+  <a class="badge text-bg-warning text-decoration-none fs-6" href="?status=OPEN">OPEN: {{ counts.OPEN|default:0 }}</a>
+  <a class="badge text-bg-primary text-decoration-none fs-6" href="?status=ACKNOWLEDGED">ACKNOWLEDGED: {{ counts.ACKNOWLEDGED|default:0 }}</a>
+  <a class="badge text-bg-success text-decoration-none fs-6" href="?status=RESOLVED">RESOLVED: {{ counts.RESOLVED|default:0 }}</a>
+  <a class="badge text-bg-danger text-decoration-none fs-6" href="?overdue=1">Quá hạn xử lý: {{ n_overdue }}</a>
+</div>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-2"><select class="form-select" name="status"><option value="active" {% if status == 'active' %}selected{% endif %}>Đang mở</option><option value="all" {% if status == 'all' %}selected{% endif %}>Tất cả</option>
+    {% for s, l in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><select class="form-select" name="severity"><option value="">Mọi mức độ</option>{% for s, l in severities %}<option value="{{ s }}" {% if s == severity %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><select class="form-select" name="type"><option value="">Mọi loại</option>{% for s, l in types %}<option value="{{ s }}" {% if s == type %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><input class="form-control" name="q" value="{{ q }}" placeholder="Tên máy hoặc serial"></div>
+  <div class="col-md-2"><button class="btn btn-dark">Lọc</button> <a class="btn btn-outline-secondary" href="?">Xóa</a></div>
+</form>
+<div class="card shadow-sm"><div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0">
+  <thead><tr><th>#</th><th>Thời gian</th><th>Máy / slot</th><th>Loại</th><th>Mức độ</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>{% for a in page_obj %}<tr>
+    <td><a href="{% url 'alert_detail' a.id %}">{{ a.id }}</a></td><td>{{ a.created_at|date:"d/m H:i" }}</td>
+    <td>{{ a.machine.name }}{% if a.machine_slot %} / slot {{ a.machine_slot.slot_number }}{% endif %}</td><td>{{ a.alert_type }}</td>
+    <td><span class="badge text-bg-{{ a.severity|badge }}">{{ a.severity }}</span></td>
+    <td><span class="badge text-bg-{{ a.status|badge }}">{{ a.status }}</span> {% if a.overdue %}<span class="badge text-bg-danger">Quá hạn</span>{% endif %}</td>
+    <td class="text-end"><a class="btn btn-outline-dark btn-sm" href="{% url 'alert_detail' a.id %}">Chi tiết</a></td></tr>
+  {% empty %}<tr><td colspan="7" class="text-muted">Không có cảnh báo.</td></tr>{% endfor %}</tbody></table></div></div>
+{% include "portal/_pagination.html" %}
+{% endblock %}

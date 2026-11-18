@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from django.conf import settings
@@ -5,6 +6,8 @@ from django.db.models import Q
 from django.utils import timezone
 
 from .models import Alert, DeviceEvent, Machine
+
+logger = logging.getLogger(__name__)
 
 
 def machine_connectivity(machine, now=None):
@@ -33,7 +36,7 @@ def raise_alert(machine_id, alert_type, severity, slot_id=None):
     )
     if exists:
         return None
-    return Alert.objects.create(
+    alert = Alert.objects.create(
         machine_id=machine_id,
         machine_slot_id=slot_id,
         alert_type=alert_type,
@@ -41,6 +44,28 @@ def raise_alert(machine_id, alert_type, severity, slot_id=None):
         status=Alert.Status.OPEN,
         created_at=timezone.now(),
     )
+    _auto_ticket(alert)
+    return alert
+
+
+# Loai canh bao nghiem trong tu dong tao phieu bao tri (co the cau hinh bang AUTO_TICKET_ALERT_TYPES trong settings)
+DEFAULT_AUTO_TICKET_TYPES = ("LEAKAGE_SUSPECTED", "ACTUATOR_FAILURE", "SENSOR_FAILURE")
+
+
+def _auto_ticket(alert):
+    """Canh bao CRITICAL thuoc loai da cau hinh -> tu dong tao phieu bao tri (dich vu cua module bao tri)."""
+    types = getattr(settings, "AUTO_TICKET_ALERT_TYPES", DEFAULT_AUTO_TICKET_TYPES)
+    if alert.severity != Alert.Severity.CRITICAL or alert.alert_type not in types:
+        return None
+    try:
+        from maintenance.services import create_ticket_from_alert
+    except ImportError:  # module bao tri chua duoc cai
+        return None
+    try:
+        return create_ticket_from_alert(alert)
+    except Exception:  # khong de loi tao phieu lam hong luong chinh
+        logger.exception("Khong tu dong tao duoc phieu bao tri cho canh bao %s", alert.pk)
+        return None
 
 
 def record_heartbeat(machine):
