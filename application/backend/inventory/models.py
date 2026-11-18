@@ -8,6 +8,8 @@ class InventoryLog(models.Model):
         SALE = "SALE", "Ban hang (xit)"
         REFILL = "REFILL", "Nap lai chai"
         ADJUSTMENT = "ADJUSTMENT", "Dieu chinh ton kho"
+        REPLACE = "REPLACE", "Thay chai"
+        DIAGNOSTIC_SPRAY = "DIAGNOSTIC_SPRAY", "Xit thu (bao tri)"
 
     id = models.AutoField(primary_key=True, db_column="InventoryLogID")
     user = models.ForeignKey(
