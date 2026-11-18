@@ -1,0 +1,27 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Báo cáo tồn kho - ScentStation{% endblock %}
+{% block page_title %}Báo cáo tồn kho ({{ days }} ngày gần nhất){% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='csv' %}">CSV</a>
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='xlsx' %}">Excel</a>
+{% endblock %}
+{% block portal_content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Theo mùi hương</div><div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th>Mùi hương</th><th class="text-end">Tồn ước tính</th><th class="text-end">Đã bán</th></tr></thead>
+    <tbody>{% for p in perfume_rows %}<tr><td>{{ p.name }}</td><td class="text-end">{{ p.quantity|money }}</td><td class="text-end">{{ p.sold|money }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="text-muted">Không có dữ liệu</td></tr>{% endfor %}</tbody></table></div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm border-warning"><div class="card-header">Slot cần nạp (sắp hết hoặc dưới 3 ngày dùng)</div><div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th>Máy / slot</th><th>Mùi hương</th><th class="text-end">Tồn</th><th class="text-end">Còn dùng (ngày)</th></tr></thead>
+    <tbody>{% for r in need_refill %}<tr><td>{{ r.slot.machine.name }} / {{ r.slot.slot_number }}</td><td>{{ r.slot.perfume.name }}</td>
+      <td class="text-end">{{ r.slot.quantity }}</td><td class="text-end">{{ r.days_left|default:"-" }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-muted">Chưa có slot nào cần nạp</td></tr>{% endfor %}</tbody></table></div></div></div>
+</div>
+<div class="card shadow-sm"><div class="card-header">Chi tiết từng slot</div><div class="table-responsive"><table class="table table-sm mb-0">
+  <thead><tr><th>Máy</th><th>Slot</th><th>Mùi hương</th><th class="text-end">Tồn</th><th>Trạng thái</th><th class="text-end">Đã bán</th><th class="text-end">TB/ngày</th><th class="text-end">Còn dùng (ngày)</th></tr></thead>
+  <tbody>{% for r in rows %}<tr><td>{{ r.slot.machine.name }}</td><td>{{ r.slot.slot_number }}</td><td>{{ r.slot.perfume.name }}</td>
+    <td class="text-end">{{ r.slot.quantity }}/{{ r.slot.capacity }}</td><td><span class="badge text-bg-{{ r.slot.status|badge }}">{{ r.slot.status }}</span></td>
+    <td class="text-end">{{ r.sold }}</td><td class="text-end">{{ r.daily }}</td><td class="text-end">{{ r.days_left|default:"-" }}</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}
