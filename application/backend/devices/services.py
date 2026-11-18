@@ -48,22 +48,23 @@ def raise_alert(machine_id, alert_type, severity, slot_id=None):
     return alert
 
 
+# Loai canh bao nghiem trong tu dong tao phieu bao tri (co the cau hinh bang AUTO_TICKET_ALERT_TYPES trong settings)
 DEFAULT_AUTO_TICKET_TYPES = ("LEAKAGE_SUSPECTED", "ACTUATOR_FAILURE", "SENSOR_FAILURE")
 
 
 def _auto_ticket(alert):
-    """Create a maintenance ticket for configured critical alerts when the service exists."""
+    """Canh bao CRITICAL thuoc loai da cau hinh -> tu dong tao phieu bao tri (dich vu cua module bao tri)."""
     types = getattr(settings, "AUTO_TICKET_ALERT_TYPES", DEFAULT_AUTO_TICKET_TYPES)
     if alert.severity != Alert.Severity.CRITICAL or alert.alert_type not in types:
         return None
     try:
         from maintenance.services import create_ticket_from_alert
-    except (ImportError, AttributeError):
+    except ImportError:  # module bao tri chua duoc cai
         return None
     try:
         return create_ticket_from_alert(alert)
-    except Exception:
-        logger.exception("Could not create maintenance ticket for alert %s", alert.pk)
+    except Exception:  # khong de loi tao phieu lam hong luong chinh
+        logger.exception("Khong tu dong tao duoc phieu bao tri cho canh bao %s", alert.pk)
         return None
 
 
