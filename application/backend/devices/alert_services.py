@@ -1,6 +1,7 @@
 """Xu ly canh bao (Nguoi 3): tiep nhan, giao viec, xu ly, mo lai, qua han (escalation)."""
 from datetime import timedelta
 
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
@@ -78,11 +79,15 @@ def technicians_for(alert):
         brand_id=_brand_id(alert), brand_role="TECHNICIAN", user__is_active=True).select_related("user")]
 
 
+@transaction.atomic
 def assign_alert(alert, user, technician_id):
     """
     Giao viec: tao phieu bao tri tu canh bao va giao cho ky thuat vien (dich vu cua Nguoi 5),
     dong thoi tiep nhan canh bao neu dang o trang thai moi.
     """
+    alert = Alert.objects.select_for_update().select_related("machine").get(pk=alert.pk)
+    if alert.status == Alert.Status.RESOLVED:
+        raise PortalError("Không thể giao việc cho cảnh báo đã xử lý; hãy mở lại cảnh báo trước.")
     tech = next((t for t in technicians_for(alert) if t.pk == technician_id), None)
     if tech is None:
         raise PortalError("Kỹ thuật viên không hợp lệ cho thương hiệu của máy này.")
