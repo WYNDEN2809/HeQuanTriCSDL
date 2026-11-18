@@ -12,7 +12,12 @@ XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 def _cell(value):
     if value is None:
         return ""
-    if isinstance(value, (datetime, date, int, float, Decimal, str)):
+    if isinstance(value, str):
+        # Keep spreadsheet software from treating user-controlled text as a formula.
+        if value.lstrip(" \t\r\n").startswith(("=", "+", "-", "@")):
+            return "'" + value
+        return value
+    if isinstance(value, (datetime, date, int, float, Decimal)):
         return value
     return str(value)
 
@@ -24,7 +29,7 @@ def csv_response(filename, headers, rows):
     writer = csv.writer(response)
     writer.writerow(headers)
     for row in rows:
-        writer.writerow(["" if v is None else v for v in row])
+        writer.writerow([_cell(v) for v in row])
     return response
 
 
