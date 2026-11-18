@@ -86,8 +86,10 @@ def alert_action(request, pk):
         messages.error(request, "Bạn không có quyền thực hiện thao tác này.")
         return redirect("alert_detail", pk=pk)
     form = NoteForm(request.POST)
-    form.is_valid()
-    data = getattr(form, "cleaned_data", {})
+    if not form.is_valid():
+        messages.error(request, "Ghi chú hoặc mã kỹ thuật viên không hợp lệ.")
+        return redirect("alert_detail", pk=pk)
+    data = form.cleaned_data
     try:
         if action == "ack":
             svc.acknowledge_alert(alert, request.user)
