@@ -1,12 +1,13 @@
 """Truy van tong hop cho dashboard va bao cao (Nguoi 3). Moi truy van deu qua scope_queryset (loc theo brand)."""
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.db.models.functions import TruncDate
+from django.utils import timezone
 
 from accounts.permissions import scope_queryset
 from devices.models import Alert, Machine, MachineSlot
-from sales.models import DispenseTransaction, Order
+from sales.models import DispenseTransaction, Order, Payment
 
 ORDER_BRAND = "machine_slot__machine__brand_id"
 
@@ -19,7 +20,7 @@ def _date(value, default):
 
 
 def parse_filters(request):
-    today = date.today()
+    today = timezone.localdate()
     f = {
         "d_from": _date(request.GET.get("from"), today - timedelta(days=29)),
         "d_to": _date(request.GET.get("to"), today),
@@ -34,18 +35,69 @@ def parse_filters(request):
 
 def orders_qs(request, f):
     qs = scope_queryset(Order.objects.all(), request, ORDER_BRAND)
-    qs = qs.filter(created_at__gte=f["d_from"], created_at__lt=f["d_to"] + timedelta(days=1))
-    if str(f["machine"]).isdigit():
-        qs = qs.filter(machine_slot__machine_id=int(f["machine"]))
-    if str(f["location"]).isdigit():
-        qs = qs.filter(machine_slot__machine__location_id=int(f["location"]))
-    if str(f["perfume"]).isdigit():
-        qs = qs.filter(perfume_id=int(f["perfume"]))
-    return qs
+    start, end = _period_bounds(f["d_from"], f["d_to"])
+    qs = qs.filter(created_at__gte=start, created_at__lt=end)
+    return _apply_asset_filters(
+        qs, f,
+        machine_field="machine_slot__machine_id",
+        location_field="machine_slot__machine__location_id",
+        perfume_field="perfume_id",
+    )
 
 
-def _hours(delta):
-    return delta.total_seconds() / 3600.0
+def _apply_asset_filters(qs, f, *, machine_field=None, location_field=None, perfume_field=None):
+    """Apply selected machine/location/perfume filters consistently to a scoped queryset."""
+    for key, field in (("machine", machine_field), ("location", location_field), ("perfume", perfume_field)):
+        value = f.get(key, "")
+        if field and str(value).isdigit():
+            qs = qs.filter(**{field: int(value)})
+    return qs.distinct()
+
+
+def _selected_alerts(request, f):
+    qs = scope_queryset(Alert.objects.all(), request, "machine__brand_id")
+    qs = _apply_asset_filters(
+        qs, f, machine_field="machine_id", location_field="machine__location_id",
+    )
+    perfume = f.get("perfume", "")
+    if str(perfume).isdigit():
+        # A machine-level alert has no slot; keep it for machines that contain the selected perfume.
+        qs = qs.filter(
+            Q(machine_slot__perfume_id=int(perfume))
+            | Q(machine_slot__isnull=True, machine__slots__perfume_id=int(perfume))
+        )
+    return qs.distinct()
+
+
+def _period_bounds(d_from, d_to):
+    """Return timezone-aware [start, end) bounds for inclusive local calendar dates."""
+    tz = timezone.get_current_timezone()
+    start = timezone.make_aware(datetime.combine(d_from, time.min), tz)
+    end = timezone.make_aware(datetime.combine(d_to + timedelta(days=1), time.min), tz)
+    return start, end
+
+
+def _downtime_hours(offline_alerts, period_start, period_end):
+    """Sum per-machine downtime, clipping to the report period and merging overlapping alerts."""
+    by_machine = {}
+    for machine_id, created_at, resolved_at in offline_alerts:
+        start = max(created_at, period_start)
+        end = min(resolved_at or period_end, period_end)
+        if end > start:
+            by_machine.setdefault(machine_id, []).append((start, end))
+
+    total_seconds = 0
+    for intervals in by_machine.values():
+        intervals.sort(key=lambda interval: interval[0])
+        merged_start, merged_end = intervals[0]
+        for start, end in intervals[1:]:
+            if start <= merged_end:
+                merged_end = max(merged_end, end)
+            else:
+                total_seconds += (merged_end - merged_start).total_seconds()
+                merged_start, merged_end = start, end
+        total_seconds += (merged_end - merged_start).total_seconds()
+    return total_seconds / 3600.0
 
 
 def dashboard_data(request, f):
@@ -68,25 +120,43 @@ def dashboard_data(request, f):
     by_location = list(delivered.values("machine_slot__machine__location__name")
                        .annotate(n=Count("id"), rev=Sum("amount")).order_by("-rev")[:10])
 
-    machines = scope_queryset(Machine.objects.all(), request, "brand_id")
+    machines = _apply_asset_filters(
+        scope_queryset(Machine.objects.all(), request, "brand_id"), f,
+        machine_field="id", location_field="location_id", perfume_field="slots__perfume_id",
+    )
     machine_status = list(machines.values("status").annotate(n=Count("id")).order_by("status"))
-    low_slots = scope_queryset(MachineSlot.objects.filter(
-        status__in=[MachineSlot.Status.LOW_STOCK, MachineSlot.Status.EMPTY]), request, "machine__brand_id").count()
+    low_slot_qs = scope_queryset(MachineSlot.objects.filter(
+        status__in=[MachineSlot.Status.LOW_STOCK, MachineSlot.Status.EMPTY]), request, "machine__brand_id")
+    low_slots = _apply_asset_filters(
+        low_slot_qs, f, machine_field="machine_id", location_field="machine__location_id",
+        perfume_field="perfume_id",
+    ).count()
 
-    alerts = scope_queryset(Alert.objects.all(), request, "machine__brand_id").filter(
-        created_at__gte=f["d_from"], created_at__lt=f["d_to"] + timedelta(days=1))
+    selected_alerts = _selected_alerts(request, f)
+    period_start, period_end = _period_bounds(f["d_from"], f["d_to"])
+    alerts = selected_alerts.filter(created_at__gte=period_start, created_at__lt=period_end)
     alert_types = list(alerts.values("alert_type").annotate(n=Count("id")).order_by("-n"))
-    resolved = list(alerts.filter(resolved_at__isnull=False).values_list("created_at", "resolved_at")[:20000])
-    avg_resolution_h = round(sum(_hours(r - c) for c, r in resolved) / len(resolved), 1) if resolved else None
-    offline = list(alerts.filter(alert_type=Alert.Type.MACHINE_OFFLINE, resolved_at__isnull=False)
-                   .values_list("created_at", "resolved_at")[:20000])
-    downtime_h = round(sum(_hours(r - c) for c, r in offline), 1)
-    period_h = ((f["d_to"] - f["d_from"]).days + 1) * 24
+    resolved = alerts.filter(resolved_at__isnull=False).values_list("created_at", "resolved_at").iterator(chunk_size=2000)
+    resolution_seconds = 0
+    resolution_count = 0
+    for created_at, resolved_at in resolved:
+        resolution_seconds += (resolved_at - created_at).total_seconds()
+        resolution_count += 1
+    avg_resolution_h = round(resolution_seconds / resolution_count / 3600, 1) if resolution_count else None
+    offline = selected_alerts.filter(alert_type=Alert.Type.MACHINE_OFFLINE).filter(
+        created_at__lt=period_end,
+    ).filter(Q(resolved_at__isnull=True) | Q(resolved_at__gt=period_start)).values_list(
+        "machine_id", "created_at", "resolved_at",
+    ).iterator(chunk_size=2000)
+    downtime_total_h = _downtime_hours(offline, period_start, period_end)
+    downtime_h = round(downtime_total_h, 1)
+    period_h = (period_end - period_start).total_seconds() / 3600.0
     n_machines = machines.count()
-    uptime_pct = round(max(0.0, 100.0 * (1 - downtime_h / (period_h * n_machines))), 1) if n_machines and period_h else None
+    total_machine_h = period_h * n_machines
+    uptime_pct = round(max(0.0, 100.0 * (1 - downtime_total_h / total_machine_h)), 1) if total_machine_h else None
 
     critical_open = list(
-        scope_queryset(Alert.objects.select_related("machine"), request, "machine__brand_id")
+        _selected_alerts(request, f).select_related("machine")
         .filter(severity=Alert.Severity.CRITICAL).exclude(status=Alert.Status.RESOLVED).order_by("-created_at")[:5]
     )
 
@@ -95,12 +165,19 @@ def dashboard_data(request, f):
         platform_brands = list(delivered.values("machine_slot__machine__brand__name")
                                .annotate(n=Count("id"), rev=Sum("amount")).order_by("-rev"))
 
+    successful_payment = Payment.objects.filter(
+        order_id=OuterRef("pk"), status=Payment.Status.SUCCESS,
+    )
+    unconfirmed_orders = orders.filter(
+        status__in=[Order.Status.DISPENSE_FAILED, Order.Status.REVIEW],
+    ).filter(Exists(successful_payment))
+
     return {
         "orders_total": orders.count(), "revenue": int(revenue), "delivered": delivered.count(),
         "dispense_total": disp_total, "dispense_ok": disp_ok,
         "dispense_rate": round(100.0 * disp_ok / disp_total, 1) if disp_total else None,
-        "unconfirmed": orders.filter(payments__status="SUCCESS",
-                                     status__in=[Order.Status.DISPENSE_FAILED, Order.Status.REVIEW]).distinct().count(),
+        "unconfirmed": unconfirmed_orders.aggregate(amount=Sum("amount"))["amount"] or 0,
+        "unconfirmed_count": unconfirmed_orders.count(),
         "daily": daily, "status_rows": status_rows, "top_perfumes": top_perfumes,
         "by_machine": by_machine, "by_location": by_location,
         "machine_status": machine_status, "low_slots": low_slots, "alert_types": alert_types,
