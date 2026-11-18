@@ -10,6 +10,7 @@ from accounts.portal_utils import PortalError
 from devices import alert_services as svc
 from devices.models import Alert, Machine
 from reports import queries
+from reports.queries import _downtime_hours
 from reports.exports import csv_response
 from reports.models import AuditLog
 from sales.models import Order
@@ -52,6 +53,14 @@ class Command(BaseCommand):
         ops = BrandMember.objects.filter(brand_id=machine.brand_id, brand_role="OPS_MANAGER").select_related("user").first().user
         now = timezone.now()
 
+        period_end = now + timedelta(hours=10)
+        downtime = _downtime_hours([
+            (1, now - timedelta(hours=2), now + timedelta(hours=5)),
+            (1, now + timedelta(hours=3), now + timedelta(hours=7)),
+            (2, now + timedelta(hours=4), None),
+        ], now, period_end)
+        self.check("Downtime gop khoang trung lap va gioi han vao ky bao cao", downtime == 13)
+
         def new_alert(sev="HIGH", age_h=0, atype="DOOR_OPEN"):
             a = Alert.objects.create(machine_id=machine.pk, alert_type=atype, severity=sev, status="OPEN",
                                      created_at=now - timedelta(hours=age_h))
@@ -89,6 +98,9 @@ class Command(BaseCommand):
             self.check("Giao viec tao phieu bao tri gan voi canh bao", ticket.alert_id == b.pk and ticket.assigned_to_id == tech.pk)
             self.check("Giao viec tu dong tiep nhan canh bao", b.status == "ACKNOWLEDGED")
             self.check("Giao cho nguoi khong phai ky thuat vien bi tu choi", self.raises(svc.assign_alert, new_alert("LOW"), ops, ops.pk))
+            closed = new_alert("LOW")
+            svc.resolve_alert(closed, ops, "Da xu ly")
+            self.check("Khong giao viec cho canh bao da xu ly", self.raises(svc.assign_alert, closed, ops, tech.pk))
         except ImportError:
             self.check("(bo qua) Giao viec: chua co module bao tri cua Nguoi 5", True)
 
@@ -110,6 +122,7 @@ class Command(BaseCommand):
         n_a = Order.objects.filter(machine_slot__machine__brand_id=machine.brand_id).count()
         self.check("So don cua brand A khop truy van truc tiep", data_a["orders_total"] == n_a, f"{data_a['orders_total']} vs {n_a}")
 
-        resp = csv_response("t", ["a", "b"], [[1, None], ["x", 2]])
+        resp = csv_response("t", ["a", "b"], [[1, None], ["x", 2], ["=1+1", None]])
         body = resp.content.decode("utf-8")
         self.check("Xuat CSV co BOM, tieu de va dong du lieu", body.startswith("\ufeffa,b") and "1," in body)
+        self.check("Xuat CSV vo hieu hoa noi dung co the bi chay nhu cong thuc", "'=1+1" in body)
