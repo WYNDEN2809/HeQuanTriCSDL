@@ -1,0 +1,13 @@
+<div class="list-group shadow-sm">
+  <a class="list-group-item list-group-item-action" href="{% url 'home' %}"><i class="bi bi-speedometer2"></i> Tổng quan</a>
+  {% if portal.transactions %}<a class="list-group-item list-group-item-action {% if '/portal/transactions' in request.path %}active{% endif %}" href="/portal/transactions/"><i class="bi bi-receipt"></i> Giao dịch</a>{% endif %}
+  {% if portal.alerts %}<a class="list-group-item list-group-item-action {% if '/portal/alerts' in request.path %}active{% endif %}" href="/portal/alerts/"><i class="bi bi-bell"></i> Cảnh báo</a>{% endif %}
+  {% if portal.machines %}<a class="list-group-item list-group-item-action {% if '/portal/machines' in request.path %}active{% endif %}" href="/portal/machines/"><i class="bi bi-cpu"></i> Máy và slot</a>{% endif %}
+  {% if portal.maintenance %}<a class="list-group-item list-group-item-action {% if '/portal/maintenance' in request.path %}active{% endif %}" href="/portal/maintenance/"><i class="bi bi-wrench-adjustable"></i> Bảo trì</a>{% endif %}
+  {% if portal.inventory %}<a class="list-group-item list-group-item-action {% if '/portal/inventory' in request.path %}active{% endif %}" href="/portal/inventory/"><i class="bi bi-box-seam"></i> Tồn kho</a>{% endif %}
+  {% if portal.reports %}<a class="list-group-item list-group-item-action {% if '/portal/reports' in request.path %}active{% endif %}" href="/portal/reports/"><i class="bi bi-graph-up"></i> Báo cáo</a>{% endif %}
+  {% if portal.catalog %}<a class="list-group-item list-group-item-action {% if '/portal/catalog' in request.path %}active{% endif %}" href="/portal/catalog/"><i class="bi bi-flower1"></i> Nước hoa và địa điểm</a>{% endif %}
+  {% if portal.people %}<a class="list-group-item list-group-item-action {% if '/portal/people' in request.path %}active{% endif %}" href="/portal/people/"><i class="bi bi-people"></i> Nhân viên</a>{% endif %}
+  {% if portal.tenants %}<a class="list-group-item list-group-item-action {% if '/portal/tenants' in request.path %}active{% endif %}" href="/portal/tenants/"><i class="bi bi-buildings"></i> Thương hiệu</a>{% endif %}
+  {% if portal.audit %}<a class="list-group-item list-group-item-action {% if '/portal/audit' in request.path %}active{% endif %}" href="/portal/audit/"><i class="bi bi-journal-text"></i> Nhật ký audit</a>{% endif %}
+</div>
