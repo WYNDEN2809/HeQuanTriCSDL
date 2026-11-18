@@ -88,7 +88,7 @@ def assign_alert(alert, user, technician_id):
         raise PortalError("Kỹ thuật viên không hợp lệ cho thương hiệu của máy này.")
     try:
         from maintenance.services import create_ticket_from_alert
-    except (ImportError, AttributeError):
+    except ImportError:
         raise PortalError("Module bảo trì chưa được cài đặt.")
     ticket = create_ticket_from_alert(alert, created_by=user, assigned_to=tech)
     if alert.status == Alert.Status.OPEN:
