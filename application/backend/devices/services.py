@@ -45,6 +45,8 @@ def raise_alert(machine_id, alert_type, severity, slot_id=None):
         created_at=timezone.now(),
     )
     _auto_ticket(alert)
+    from reports.notifications import notify_alert_created
+    notify_alert_created(alert)
     return alert
 
 

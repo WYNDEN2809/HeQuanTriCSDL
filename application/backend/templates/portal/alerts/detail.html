@@ -7,7 +7,7 @@
 <div class="row g-3 mb-3">
   <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
     <div><b>Loại:</b> {{ alert.alert_type }}</div>
-    <div><b>Máy:</b> <a href="{% url 'machine_detail' alert.machine_id %}">{{ alert.machine.name }}</a> ({{ alert.machine.location.name }})</div>
+    <div><b>Máy:</b> {{ alert.machine.name }} ({{ alert.machine.location.name }})</div>
     {% if alert.machine_slot %}<div><b>Slot:</b> {{ alert.machine_slot.slot_number }} - {{ alert.machine_slot.perfume.name }}</div>{% endif %}
     <div><b>Phát sinh:</b> {{ alert.created_at|date:"d/m/Y H:i:s" }}</div>
     <div><b>Hạn xử lý (SLA):</b> {{ deadline|date:"d/m/Y H:i" }}</div>
@@ -34,7 +34,7 @@
 </div>
 <div class="row g-3">
   <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Phiếu bảo trì liên quan</div><ul class="list-group list-group-flush">
-    {% for t in tickets %}<li class="list-group-item d-flex justify-content-between"><a href="/portal/maintenance/{{ t.id }}/">#{{ t.id }} {{ t.maintenance_type }}</a><span class="badge text-bg-{{ t.status|badge }}">{{ t.status }}</span></li>
+    {% for t in tickets %}<li class="list-group-item d-flex justify-content-between"><a href="{% url 'maintenance_detail' t.id %}">#{{ t.id }} {{ t.maintenance_type }}</a><span class="badge text-bg-{{ t.status|badge }}">{{ t.status }}</span></li>
     {% empty %}<li class="list-group-item text-muted">Chưa có phiếu nào</li>{% endfor %}</ul></div></div>
   <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Lịch sử thao tác</div><ul class="list-group list-group-flush">
     {% for h in history %}<li class="list-group-item small"><b>{{ h.action }}</b> bởi {{ h.user.username|default:"hệ thống" }} lúc {{ h.created_at|date:"d/m H:i" }}<div class="text-muted">{{ h.new_value|default:"" }}</div></li>

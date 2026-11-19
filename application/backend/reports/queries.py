@@ -1,6 +1,7 @@
 """Truy van tong hop cho dashboard va bao cao (Nguoi 3). Moi truy van deu qua scope_queryset (loc theo brand)."""
 from datetime import date, datetime, time, timedelta
 
+from django.conf import settings
 from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
@@ -20,7 +21,8 @@ def _date(value, default):
 
 
 def parse_filters(request):
-    today = timezone.localdate()
+    # USE_TZ=False: SQL Server datetime columns and Django operate on naive local time.
+    today = timezone.now().date()
     f = {
         "d_from": _date(request.GET.get("from"), today - timedelta(days=29)),
         "d_to": _date(request.GET.get("to"), today),
@@ -70,10 +72,13 @@ def _selected_alerts(request, f):
 
 
 def _period_bounds(d_from, d_to):
-    """Return timezone-aware [start, end) bounds for inclusive local calendar dates."""
-    tz = timezone.get_current_timezone()
-    start = timezone.make_aware(datetime.combine(d_from, time.min), tz)
-    end = timezone.make_aware(datetime.combine(d_to + timedelta(days=1), time.min), tz)
+    """Return [start, end) bounds matching the datetime mode used by the database."""
+    start = datetime.combine(d_from, time.min)
+    end = datetime.combine(d_to + timedelta(days=1), time.min)
+    if settings.USE_TZ:
+        tz = timezone.get_current_timezone()
+        start = timezone.make_aware(start, tz)
+        end = timezone.make_aware(end, tz)
     return start, end
 
 
