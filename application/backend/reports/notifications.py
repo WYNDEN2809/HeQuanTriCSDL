@@ -87,7 +87,8 @@ def notify_technician_assignment(alert, technician, ticket):
 def retry_pending_emails(limit=500):
     if not getattr(settings, "ALERT_EMAIL_NOTIFICATIONS", False):
         return 0
-    pending = Notification.objects.filter(external_sent_at__isnull=True).select_related("user").order_by("created_at")[:limit]
+    pending = list(Notification.objects.filter(external_sent_at__isnull=True)
+                    .select_related("user").order_by("created_at")[:limit])
     attempted = 0
     for notification in pending:
         if notification.user.email:
