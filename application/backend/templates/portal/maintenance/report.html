@@ -1,0 +1,33 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Báo cáo bảo trì - ScentStation{% endblock %}
+{% block page_title %}Báo cáo bảo trì{% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='csv' %}">CSV</a>
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='xlsx' %}">Excel</a>
+{% endblock %}
+{% block portal_content %}
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-2"><input type="date" class="form-control" name="from" value="{{ d_from }}"></div>
+  <div class="col-md-2"><input type="date" class="form-control" name="to" value="{{ d_to }}"></div>
+  <div class="col-md-2"><button class="btn btn-dark">Xem</button></div>
+</form>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Tổng số phiếu</div><div class="display-6">{{ total }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Thời gian xử lý TB</div><div class="display-6">{% if avg_hours is not None %}{{ avg_hours }}<small class="fs-6"> giờ</small>{% else %}-{% endif %}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm border-danger"><div class="card-body"><div class="text-muted small">Phiếu quá hạn</div><div class="display-6 text-danger">{{ overdue }}</div></div></div></div>
+  <div class="col-6 col-lg-3"><div class="card shadow-sm border-warning"><div class="card-body"><div class="text-muted small">Máy hỏng lặp lại (≥ {{ threshold }} phiếu)</div><div class="display-6">{{ repeat_machines|length }}</div></div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-8"><div class="card shadow-sm"><div class="card-header">Theo máy</div><div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th>Máy</th><th class="text-end">Phiếu</th><th class="text-end">Hoàn thành</th><th class="text-end">Downtime (giờ)</th><th class="text-end">TB xử lý (giờ)</th><th></th></tr></thead>
+    <tbody>{% for m in machines %}<tr><td>{{ m.name }}</td><td class="text-end">{{ m.tickets }}</td><td class="text-end">{{ m.completed }}</td><td class="text-end">{{ m.downtime_h }}</td><td class="text-end">{{ m.avg_h|default:"-" }}</td><td>{% if m.repeat %}<span class="badge text-bg-warning">Hỏng lặp lại</span>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="6" class="text-muted">Không có phiếu trong kỳ</td></tr>{% endfor %}</tbody></table></div></div></div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-3"><div class="card-header">Theo mức ưu tiên</div><ul class="list-group list-group-flush">
+      {% for p in priorities %}<li class="list-group-item d-flex justify-content-between"><span class="badge text-bg-{{ p.priority|badge }}">{{ p.priority }}</span><span>{{ p.n }} phiếu · TB {{ p.avg_h|default:"-" }} giờ</span></li>{% empty %}<li class="list-group-item text-muted">Không có</li>{% endfor %}</ul></div>
+    <div class="card shadow-sm"><div class="card-header">Tần suất bảo trì theo tháng</div><ul class="list-group list-group-flush">
+      {% for month, n in months %}<li class="list-group-item d-flex justify-content-between"><span>{{ month }}</span><b>{{ n }}</b></li>{% empty %}<li class="list-group-item text-muted">Không có</li>{% endfor %}</ul></div>
+  </div>
+</div>
+{% endblock %}
