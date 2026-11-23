@@ -1,5 +1,5 @@
 /* =====================================================================
-   Tao CSDL ScentStationDB + 15 bang
+   Tao CSDL ScentStationDB + 16 bang (15 bang ERD + MaintenanceChecklistItem)
    Chay file nay DAU TIEN. Se xoa va tao lai database neu da ton tai.
    ===================================================================== */
 
@@ -190,4 +190,19 @@ CREATE TABLE AuditLog (
     new_value   nvarchar(max) NULL,
     created_at  datetime2 NOT NULL CONSTRAINT DF_Audit_created DEFAULT SYSDATETIME()
 );
+
+-- Bang bo sung (quyet dinh cua nhom o Buoc 3): checklist cua phieu bao tri
+CREATE TABLE MaintenanceChecklistItem (
+    ChecklistItemID     int IDENTITY(1,1) CONSTRAINT PK_ChecklistItem PRIMARY KEY,
+    MaintenanceRecordID int NOT NULL CONSTRAINT FK_Checklist_Record REFERENCES MaintenanceRecord(MaintenanceRecordID),
+    phase               varchar(20) NOT NULL CONSTRAINT CK_Checklist_phase
+        CHECK (phase IN ('INSPECTION','REPAIR','REFILL_SUPPORT','POST_MAINTENANCE','RESULT')),
+    item_text           nvarchar(200) NOT NULL,
+    is_done             bit NOT NULL CONSTRAINT DF_Checklist_done DEFAULT 0,
+    DoneByUserID        int NULL CONSTRAINT FK_Checklist_User REFERENCES [User](UserID),
+    done_at             datetime2 NULL,
+    note                nvarchar(500) NULL,
+    sort_order          int NOT NULL CONSTRAINT DF_Checklist_sort DEFAULT 0
+);
+CREATE INDEX IX_Checklist_Record ON MaintenanceChecklistItem(MaintenanceRecordID);
 GO

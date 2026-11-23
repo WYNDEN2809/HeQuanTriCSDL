@@ -1,0 +1,10 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Tạo phiếu bảo trì - ScentStation{% endblock %}
+{% block page_title %}Tạo phiếu bảo trì{% endblock %}
+{% block portal_content %}
+<div class="row"><div class="col-lg-6"><div class="card shadow-sm"><div class="card-body">
+  <p class="text-muted small">Phiếu mức <b>Nghiêm trọng</b> sẽ chuyển máy sang trạng thái lỗi để không nhận đơn mới cho tới khi bảo trì xong.</p>
+  <form method="post">{% csrf_token %}{% include "portal/_form_fields.html" %}
+    <button class="btn btn-dark">Tạo phiếu</button> <a class="btn btn-outline-secondary" href="{% url 'mt_list' %}">Hủy</a></form>
+</div></div></div></div>
+{% endblock %}

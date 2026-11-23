@@ -1,0 +1,51 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Đơn {{ order.payment_reference }} - ScentStation{% endblock %}
+{% block page_title %}Đơn <code>{{ order.payment_reference }}</code> <span class="badge text-bg-{{ order.status|badge }}">{{ order.status }}</span>{% endblock %}
+{% block page_actions %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'tx_list' %}">&laquo; Danh sách</a>{% endblock %}
+{% block portal_content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div><b>Thời gian:</b> {{ order.created_at|date:"d/m/Y H:i:s" }} (hết hạn {{ order.expires_at|date:"H:i:s" }})</div>
+    <div><b>Máy:</b> <a href="{% url 'machine_detail' order.machine_slot.machine_id %}">{{ order.machine_slot.machine.name }}</a> / slot {{ order.machine_slot.slot_number }}</div>
+    <div><b>Địa điểm:</b> {{ order.machine_slot.machine.location.name }}</div>
+    <div><b>Mùi hương:</b> {{ order.perfume.name }} × {{ order.quantity }}</div>
+    <div><b>Đơn giá chốt:</b> {{ order.unit_price|money }} {{ order.currency }} &nbsp; <b>Thành tiền:</b> {{ order.amount|money }}</div>
+  </div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div class="fw-semibold mb-2">Xử lý đơn</div>
+    {% if actions %}
+    <form method="post" action="{% url 'tx_action' order.id %}">{% csrf_token %}
+      <div class="mb-2"><select name="action" class="form-select form-select-sm">{% for v, l in actions %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
+      {% include "portal/_form_fields.html" %}
+      <button class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận thực hiện thao tác này?')">Thực hiện</button>
+    </form>
+    {% else %}<div class="text-muted">Không có thao tác nào khả dụng cho đơn này (hoặc bạn chỉ có quyền xem).</div>{% endif %}
+    {% if retries %}<div class="small text-muted mt-2">Đã thử lại {{ retries }} lần.</div>{% endif %}
+  </div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Thanh toán</div><ul class="list-group list-group-flush">
+    {% for p in payments %}<li class="list-group-item d-flex justify-content-between"><span>{{ p.method }} <code>{{ p.provider_transaction_id }}</code><br><small class="text-muted">{{ p.created_at|date:"d/m H:i:s" }}</small></span>
+      <span class="text-end"><span class="badge text-bg-{{ p.status|badge }}">{{ p.status }}</span><br>{{ p.amount|money }}</span></li>
+    {% empty %}<li class="list-group-item text-muted">Chưa có thanh toán</li>{% endfor %}</ul></div></div>
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Lệnh xịt và kết quả từ máy</div><div class="card-body">
+    {% if dispense %}
+      <div><span class="badge text-bg-{{ dispense.status|badge }}">{{ dispense.status }}</span> <code>{{ dispense.command_id }}</code></div>
+      <div class="small mt-2">Tạo: {{ dispense.created_at|date:"H:i:s" }} · Hạn: {{ dispense.expires_at|date:"H:i:s" }}<br>
+        Máy xác nhận: {{ dispense.acknowledged_at|date:"H:i:s"|default:"-" }} · Thực thi: {{ dispense.executed_at|date:"H:i:s"|default:"-" }}</div>
+      {% if dispense.error_message %}<div class="text-danger small mt-1">{{ dispense.error_message }}</div>{% endif %}
+    {% else %}<span class="text-muted">Không có lệnh xịt (đơn chưa thanh toán hoặc bị chặn).</span>{% endif %}
+  </div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Trừ tồn kho</div><ul class="list-group list-group-flush">
+    {% for l in inventory_logs %}<li class="list-group-item small">{{ l.change_type }}: {{ l.quantity_before }} → {{ l.quantity_after }} ({{ l.created_at|date:"H:i:s" }})</li>
+    {% empty %}<li class="list-group-item text-muted">Chưa trừ tồn kho (chỉ trừ khi máy báo xịt thành công)</li>{% endfor %}</ul></div></div>
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Cảnh báo liên quan</div><ul class="list-group list-group-flush">
+    {% for a in alerts %}<li class="list-group-item small"><a href="{% url 'alert_detail' a.id %}">#{{ a.id }} {{ a.alert_type }}</a> <span class="badge text-bg-{{ a.status|badge }}">{{ a.status }}</span></li>
+    {% empty %}<li class="list-group-item text-muted">Không có</li>{% endfor %}</ul></div></div>
+  <div class="col-12"><div class="card shadow-sm"><div class="card-header">Dòng thời gian audit (truy vết đầu cuối)</div><ul class="list-group list-group-flush">
+    {% for h in trail %}<li class="list-group-item small"><b>{{ h.action }}</b> · {{ h.user.username|default:"hệ thống" }} · {{ h.created_at|date:"d/m H:i:s" }}<div class="text-muted">{{ h.new_value|default:"" }}</div></li>
+    {% empty %}<li class="list-group-item text-muted">Chưa có bản ghi audit</li>{% endfor %}</ul></div></div>
+</div>
+{% endblock %}

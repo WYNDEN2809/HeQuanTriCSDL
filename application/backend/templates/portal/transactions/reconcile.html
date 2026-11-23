@@ -1,0 +1,26 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Đối chiếu giao dịch - ScentStation{% endblock %}
+{% block page_title %}Đối chiếu với nhà cung cấp thanh toán{% endblock %}
+{% block page_actions %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'tx_list' %}">&laquo; Giao dịch</a>
+  {% if has_export %}<a class="btn btn-outline-success btn-sm" href="{% url 'tx_reconcile_export' %}?format=csv">Xuất dòng lệch (CSV)</a>
+  <a class="btn btn-outline-success btn-sm" href="{% url 'tx_reconcile_export' %}?format=xlsx">Excel</a>{% endif %}{% endblock %}
+{% block portal_content %}
+<div class="card shadow-sm mb-3"><div class="card-body">
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    <div class="row"><div class="col-lg-6">{% include "portal/_form_fields.html" %}</div></div>
+    <button class="btn btn-dark">Đối chiếu</button>
+    <span class="text-muted small ms-2">Khớp theo mã giao dịch của nhà cung cấp (provider_transaction_id).</span>
+  </form>
+</div></div>
+{% if result %}
+<div class="d-flex flex-wrap gap-2 mb-3">{% for key, label, n in summary %}<span class="badge text-bg-{% if key == 'matched' %}success{% elif n %}danger{% else %}secondary{% endif %} fs-6">{{ label }}: {{ n }}</span>{% endfor %}</div>
+{% for key, label, n in summary %}{% if key != 'matched' and n %}
+<div class="card shadow-sm mb-3 border-danger"><div class="card-header">{{ label }} ({{ n }})</div><div class="table-responsive"><table class="table table-sm mb-0">
+  <thead><tr><th>Mã giao dịch</th><th>Mã đơn</th><th class="text-end">Hệ thống</th><th>TT hệ thống</th><th class="text-end">Nhà cung cấp</th><th>TT nhà cung cấp</th></tr></thead>
+  <tbody>{% for r in result|dictget:key|slice:":200" %}<tr><td><code>{{ r.txn }}</code></td><td>{{ r.reference|default:"-" }}</td>
+    <td class="text-end">{{ r.i_amount|default_if_none:"-" }}</td><td>{{ r.i_status|default:"-" }}</td>
+    <td class="text-end">{{ r.p_amount|default_if_none:"-" }}</td><td>{{ r.p_status|default:"-" }}</td></tr>{% endfor %}</tbody></table></div></div>
+{% endif %}{% endfor %}
+{% endif %}
+{% endblock %}
