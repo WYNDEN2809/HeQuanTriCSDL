@@ -1,10 +1,10 @@
 # ScentStation – Backend (Django + SQL Server)
 
-Thư mục này chứa project Django. Database là SQL Server tạo bằng 4 file trong `../database/`
-(Django **không** tạo/sửa 15 bảng nghiệp vụ – các model đều `managed = False`).
+Thư mục này chứa project Django. Database là SQL Server tạo bằng 4 file trong `../database/`, sau đó áp dụng script bổ sung P3 `05_AddP3Notifications.sql`.
+(Django **không** tự tạo/sửa các bảng nghiệp vụ – các model đều `managed = False`).
 
 ## 1. Chuẩn bị (làm 1 lần)
-1. Chạy 4 file SQL `01 → 04` trong `application/database/` để có database `ScentStationDB`.
+1. Chạy 4 file SQL `01 → 04` trong `application/database/` để có database `ScentStationDB`; sau đó chạy `05_AddP3Notifications.sql` để tạo bảng thông báo P3.
 2. Cài **ODBC Driver 18 for SQL Server**: https://learn.microsoft.com/sql/connect/odbc/download-odbc-driver-for-sql-server
 3. Python 3.10 – 3.12. Tạo môi trường ảo và cài thư viện:
    ```bash
@@ -21,7 +21,7 @@ Thư mục này chứa project Django. Database là SQL Server tạo bằng 4 fi
 python manage.py makemigrations accounts catalog devices sales inventory maintenance reports
 python manage.py migrate
 python manage.py reset_sample_passwords   # đặt mật khẩu Django cho 31 user mẫu: ScentStation@2026
-python manage.py check_db                 # đếm số dòng 15 bảng, đối chiếu model <-> bảng thật
+python manage.py check_db                 # kiểm tra kết nối và đếm dòng các bảng nghiệp vụ
 python manage.py runserver
 ```
 Mở http://127.0.0.1:8000/ và đăng nhập.
@@ -120,7 +120,10 @@ Thử thêm: `--bad-signature` (401), `--amount 1` (400), `--status FAILED`.
 - Máy online dựa trên heartbeat: `run_device_simulator` cũng đóng vai bộ giám sát, máy không còn heartbeat > 90 giây sẽ thành OFFLINE (kèm sự kiện + cảnh báo) và không nhận đơn mới.
 - Các thao tác quan trọng được ghi `AuditLog` (PAYMENT_CONFIRMED, DISPENSE_COMMAND_CREATED, DISPENSE_RESULT, DISPENSE_TIMEOUT, PAYMENT_AFTER_EXPIRY...).
 
-## Giới hạn hiện tại (để bước sau)
-- Giao diện portal cho Operations Manager (xem đơn lỗi, **hoàn tiền / thử lại có kiểm soát**, đóng REVIEW) chưa có – hiện chỉ thấy số liệu và xem qua Django Admin.
-- Refill, phiếu bảo trì, cảnh báo trên portal: Bước 3.
+## P3 và giới hạn còn lại
+- Portal Operations Manager cho đơn lỗi (xem, **hoàn tiền / thử lại có kiểm soát**, đóng REVIEW) chưa có – hiện chỉ xem số liệu và thao tác qua Django Admin.
+- Portal P3 gồm báo cáo, cảnh báo, tồn kho/nạp lại, phiếu bảo trì và hộp thư thông báo. Self-test P3: `python manage.py selftest_alerts` (các thao tác dữ liệu được rollback).
+- Với database đã có, chạy `application/database/05_AddP3Notifications.sql` một lần để thêm bảng thông báo.
+- Cảnh báo mới và phiếu được giao tạo thông báo trong portal. Có thể bật email bằng `ALERT_EMAIL_NOTIFICATIONS=True` và cấu hình `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS` (hoặc `EMAIL_USE_SSL`) và `DEFAULT_FROM_EMAIL` trong `.env`.
+- Tác vụ leo thang SLA chạy bằng `python manage.py escalate_alerts`; hãy lập lịch chạy định kỳ (ví dụ mỗi 5 phút bằng Windows Task Scheduler) để tự động gửi thông báo cho Brand Admin/Operations Manager. Lệnh có thể chạy lặp an toàn, không tạo thông báo trùng cho cùng một người và cảnh báo.
 - Token thiết bị suy ra từ `DEVICE_API_SECRET` + serial (đủ cho prototype); bản thật nên cấp khóa riêng cho từng máy.

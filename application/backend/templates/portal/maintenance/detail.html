@@ -1,0 +1,9 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Phiếu #{{ ticket.id }} - ScentStation{% endblock %}
+{% block page_title %}Phiếu bảo trì #{{ ticket.id }} <span class="badge text-bg-{{ ticket.status|badge }}">{{ ticket.status }}</span>{% endblock %}
+{% block page_actions %}<a href="{% url 'maintenance_list' %}" class="btn btn-outline-secondary btn-sm">Danh sách</a>{% endblock %}
+{% block portal_content %}
+<div class="card shadow-sm mb-3"><div class="card-body"><p><b>Máy:</b> {{ ticket.machine.name }} · {{ ticket.machine.location.name }}</p><p><b>Loại:</b> {{ ticket.maintenance_type }}</p><p><b>Người tạo:</b> {{ ticket.created_by.username }} · <b>Kỹ thuật viên:</b> {{ ticket.assigned_to.username|default:"Chưa giao" }}</p><p><b>Tạo lúc:</b> {{ ticket.created_at|date:"d/m/Y H:i" }} · <b>Hoàn tất:</b> {{ ticket.completed_at|date:"d/m/Y H:i"|default:"-" }}</p><pre class="mb-0">{{ ticket.description|default:"Không có mô tả." }}</pre></div></div>
+{% if can_work and ticket.status != 'COMPLETED' and ticket.status != 'CANCELLED' %}<form method="post" action="{% url 'maintenance_action' ticket.id %}" class="card card-body shadow-sm">{% csrf_token %}<label class="form-label" for="note">Kết quả / ghi chú</label><textarea class="form-control mb-2" name="note" id="note" maxlength="500"></textarea><div class="d-flex gap-2">{% if ticket.status == 'OPEN' %}<button class="btn btn-primary" name="action" value="start">Bắt đầu xử lý</button>{% endif %}{% if ticket.status == 'IN_PROGRESS' %}<button class="btn btn-success" name="action" value="complete">Hoàn tất</button>{% endif %}{% if request.brand_role == 'OPS_MANAGER' or request.brand_role == 'BRAND_ADMIN' or user.is_platform_admin %}<button class="btn btn-outline-danger" name="action" value="cancel">Hủy phiếu</button>{% endif %}</div></form>{% endif %}
+{% endblock %}

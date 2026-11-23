@@ -6,7 +6,7 @@ PROJECT_APPS = ["accounts", "catalog", "devices", "sales", "inventory", "mainten
 
 
 class Command(BaseCommand):
-    help = "Kiem tra ket noi SQL Server va dem so dong cua 15 bang ScentStation (doi chieu model <-> bang that)."
+    help = "Kiem tra ket noi SQL Server va dem so dong cac bang nghiep vu (doi chieu model <-> bang that)."
 
     def handle(self, *args, **opts):
         with connection.cursor() as cur:

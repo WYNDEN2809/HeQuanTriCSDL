@@ -26,3 +26,27 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.action} {self.entity_type}#{self.entity_id}"
+
+
+class Notification(models.Model):
+    """Durable in-app notification addressed to one user."""
+
+    id = models.AutoField(primary_key=True, db_column="NotificationID")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE, db_column="UserID", related_name="notifications")
+    brand = models.ForeignKey("catalog.Brand", models.CASCADE, db_column="BrandID", related_name="notifications")
+    event_key = models.CharField(max_length=120)
+    title = models.CharField(max_length=200)
+    message = models.CharField(max_length=1000)
+    target_url = models.CharField(max_length=300)
+    created_at = models.DateTimeField(default=timezone.now)
+    read_at = models.DateTimeField(blank=True, null=True)
+    external_sent_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "Notification"
+        ordering = ["-created_at"]
+        unique_together = [("user", "event_key")]
+
+    def __str__(self):
+        return f"{self.title} -> {self.user}"
