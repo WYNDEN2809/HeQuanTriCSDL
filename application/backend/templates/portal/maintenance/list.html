@@ -2,6 +2,11 @@
 {% load portal_extras %}
 {% block title %}Bảo trì - ScentStation{% endblock %}
 {% block page_title %}Phiếu bảo trì{% endblock %}
+<<<<<<< HEAD
+{% block portal_content %}
+<form method="get" class="mb-3"><select name="status" class="form-select d-inline-block w-auto">{% for value,label in statuses %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}<option value="all" {% if status == 'all' %}selected{% endif %}>Tất cả</option></select> <button class="btn btn-dark">Lọc</button></form>
+<div class="card shadow-sm"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Mã</th><th>Máy</th><th>Loại</th><th>Kỹ thuật viên</th><th>Tạo lúc</th><th>Trạng thái</th></tr></thead><tbody>{% for t in page_obj %}<tr><td><a href="{% url 'maintenance_detail' t.id %}">#{{ t.id }}</a></td><td>{{ t.machine.name }}</td><td>{{ t.maintenance_type }}</td><td>{{ t.assigned_to.username|default:"Chưa giao" }}</td><td>{{ t.created_at|date:"d/m/Y H:i" }}</td><td><span class="badge text-bg-{{ t.status|badge }}">{{ t.status }}</span></td></tr>{% empty %}<tr><td colspan="6" class="text-muted">Không có phiếu bảo trì.</td></tr>{% endfor %}</tbody></table></div></div>
+=======
 {% block page_actions %}
   <a class="btn btn-outline-dark btn-sm" href="?mine=1">Phiếu của tôi</a>
   <a class="btn btn-outline-dark btn-sm" href="{% url 'mt_report' %}">Báo cáo bảo trì</a>
@@ -24,5 +29,6 @@
     <td><span class="badge text-bg-{{ t.status|badge }}">{{ t.status }}</span> {% if t.overdue %}<span class="badge text-bg-danger">Quá hạn</span>{% endif %}</td>
     <td>{{ t.created_at|date:"d/m H:i" }}</td></tr>
   {% empty %}<tr><td colspan="8" class="text-muted">Không có phiếu nào.</td></tr>{% endfor %}</tbody></table></div></div>
+>>>>>>> origin/main
 {% include "portal/_pagination.html" %}
 {% endblock %}

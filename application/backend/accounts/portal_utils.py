@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+"""Shared helpers for brand-scoped portal pages."""
+
+from django.core.paginator import Paginator
+
+=======
 """Tien ich dung chung cho cac man hinh portal."""
 import unicodedata
 
@@ -5,10 +11,19 @@ from django import forms
 from django.core.paginator import Paginator
 
 from . import roles
+>>>>>>> origin/main
 from .permissions import scope_queryset
 
 
 class PortalError(Exception):
+<<<<<<< HEAD
+    """An expected validation or workflow error safe to show to portal users."""
+
+
+def scoped_for_role(request, queryset, brand_field, platform_scope_field=None):
+    """Scope rows to the active brand (the view decorator enforces role access)."""
+    return scope_queryset(queryset, request, brand_field)
+=======
     """Loi nghiep vu co thong diep hien thi duoc cho nguoi dung."""
 
 
@@ -24,10 +39,13 @@ def ascii_text(value, max_len=None):
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = text.encode("ascii", "ignore").decode("ascii")
     return text[:max_len] if max_len else text
+>>>>>>> origin/main
 
 
 def paginate(request, queryset, per_page=25):
     return Paginator(queryset, per_page).get_page(request.GET.get("page"))
+<<<<<<< HEAD
+=======
 
 
 def require_brand_context(request):
@@ -96,3 +114,4 @@ class PasswordConfirmForm(StyledForm):
         if self.user is None or not self.user.check_password(pwd):
             raise forms.ValidationError("Mật khẩu không đúng.")
         return pwd
+>>>>>>> origin/main

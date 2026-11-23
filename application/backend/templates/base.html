@@ -20,6 +20,11 @@
     <div class="collapse navbar-collapse" id="nav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Tổng quan</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'report_dashboard' %}">Báo cáo</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'alert_list' %}">Cảnh báo</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'inv_report' %}">Tồn kho</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'maintenance_list' %}">Bảo trì</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'notification_list' %}">Thông báo</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'kiosk_machines' %}" target="_blank">Kiosk demo</a></li>
         {% block nav_items %}{% endblock %}
         {% if user.is_staff %}

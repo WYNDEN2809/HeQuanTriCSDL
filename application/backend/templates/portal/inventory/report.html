@@ -1,0 +1,13 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Tồn kho - ScentStation{% endblock %}
+{% block page_title %}Tồn kho và lịch sử nạp{% endblock %}
+{% block portal_content %}
+<form method="get" class="row g-2 mb-3"><div class="col-md-5"><input class="form-control" name="q" value="{{ q }}" placeholder="Tìm máy hoặc mùi hương"></div><div class="col-auto"><button class="btn btn-dark">Lọc</button></div></form>
+<div class="card shadow-sm mb-3"><div class="card-header">Khe sắp hết / hết</div><div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Máy</th><th>Địa điểm</th><th>Khe</th><th>Mùi hương</th><th>Còn lại</th><th>Trạng thái</th></tr></thead><tbody>
+{% for s in low_slots %}<tr><td>{{ s.machine.name }}</td><td>{{ s.machine.location.name }}</td><td>{{ s.slot_number }}</td><td>{{ s.perfume.name }}</td><td>{{ s.quantity }} / {{ s.capacity }}</td><td><span class="badge text-bg-{{ s.status|badge }}">{{ s.status }}</span></td><td>{% if request.brand_role == 'INVENTORY_STAFF' or request.brand_role == 'OPS_MANAGER' or request.brand_role == 'BRAND_ADMIN' or user.is_platform_admin %}<form method="post" action="{% url 'inv_refill' s.id %}" class="d-flex gap-1">{% csrf_token %}<input class="form-control form-control-sm" type="number" min="1" name="quantity" placeholder="Số lượt" required><button class="btn btn-sm btn-outline-primary">Nạp</button></form>{% endif %}</td></tr>{% empty %}<tr><td colspan="7" class="text-muted">Không có khe tồn kho thấp.</td></tr>{% endfor %}</tbody></table></div></div>
+{% include "portal/_pagination.html" with page_obj=low_slots %}
+<div class="card shadow-sm"><div class="card-header">Lịch sử biến động tồn kho</div><div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Thời gian</th><th>Máy / khe</th><th>Mùi hương</th><th>Loại</th><th>Trước</th><th>Sau</th><th>Người thực hiện</th></tr></thead><tbody>
+{% for x in logs %}<tr><td>{{ x.created_at|date:"d/m/Y H:i" }}</td><td>{{ x.machine_slot.machine.name }} / {{ x.machine_slot.slot_number }}</td><td>{{ x.machine_slot.perfume.name }}</td><td>{{ x.change_type }}</td><td>{{ x.quantity_before }}</td><td>{{ x.quantity_after }}</td><td>{{ x.user.username|default:"Hệ thống" }}</td></tr>{% empty %}<tr><td colspan="7" class="text-muted">Chưa có lịch sử.</td></tr>{% endfor %}</tbody></table></div></div>
+{% include "portal/_pagination.html" with page_obj=logs %}
+{% endblock %}

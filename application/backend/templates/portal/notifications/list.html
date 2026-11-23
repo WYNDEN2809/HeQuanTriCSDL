@@ -1,0 +1,9 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Thông báo - ScentStation{% endblock %}
+{% block page_title %}Thông báo{% endblock %}
+{% block portal_content %}
+<div class="card shadow-sm"><ul class="list-group list-group-flush">
+{% for n in page_obj %}<li class="list-group-item d-flex justify-content-between align-items-start gap-3 {% if not n.read_at %}list-group-item-warning{% endif %}"><div><div class="fw-semibold">{{ n.title }}</div><div>{{ n.message }}</div><small class="text-muted">{{ n.brand.name }} · {{ n.created_at|date:"d/m/Y H:i" }}</small></div><div class="d-flex gap-2">{% if not n.read_at %}<form method="post" action="{% url 'notification_read' n.id %}">{% csrf_token %}<button class="btn btn-sm btn-outline-dark">Đã đọc</button></form>{% endif %}<a class="btn btn-sm btn-outline-primary" href="{{ n.target_url }}">Mở</a></div></li>
+{% empty %}<li class="list-group-item text-muted">Bạn chưa có thông báo.</li>{% endfor %}
+</ul></div>
+{% endblock %}

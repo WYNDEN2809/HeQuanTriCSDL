@@ -1,0 +1,43 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Cảnh báo #{{ alert.id }} - ScentStation{% endblock %}
+{% block page_title %}Cảnh báo #{{ alert.id }} <span class="badge text-bg-{{ alert.severity|badge }}">{{ alert.severity }}</span> <span class="badge text-bg-{{ alert.status|badge }}">{{ alert.status }}</span>{% if overdue %} <span class="badge text-bg-danger">Quá hạn</span>{% endif %}{% endblock %}
+{% block page_actions %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'alert_list' %}">&laquo; Danh sách</a>{% endblock %}
+{% block portal_content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div><b>Loại:</b> {{ alert.alert_type }}</div>
+    <div><b>Máy:</b> {{ alert.machine.name }} ({{ alert.machine.location.name }})</div>
+    {% if alert.machine_slot %}<div><b>Slot:</b> {{ alert.machine_slot.slot_number }} - {{ alert.machine_slot.perfume.name }}</div>{% endif %}
+    <div><b>Phát sinh:</b> {{ alert.created_at|date:"d/m/Y H:i:s" }}</div>
+    <div><b>Hạn xử lý (SLA):</b> {{ deadline|date:"d/m/Y H:i" }}</div>
+    <div><b>Tiếp nhận:</b> {{ alert.acknowledged_at|date:"d/m/Y H:i:s"|default:"-" }}</div>
+    <div><b>Đã xử lý:</b> {{ alert.resolved_at|date:"d/m/Y H:i:s"|default:"-" }}</div>
+  </div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div class="fw-semibold mb-2">Thao tác</div>
+    <form method="post" action="{% url 'alert_action' alert.id %}">{% csrf_token %}
+      <textarea class="form-control mb-2" name="note" rows="2" maxlength="500" placeholder="Ghi chú / chi tiết xử lý / lý do mở lại"></textarea>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        {% if can_ack and alert.status == 'OPEN' %}<button name="action" value="ack" class="btn btn-primary btn-sm">Tiếp nhận</button>{% endif %}
+        {% if can_manage and alert.status != 'RESOLVED' %}<button name="action" value="resolve" class="btn btn-success btn-sm">Đã xử lý</button>{% endif %}
+        {% if can_manage and alert.status == 'RESOLVED' %}<button name="action" value="reopen" class="btn btn-warning btn-sm">Mở lại</button>{% endif %}
+      </div>
+      {% if can_manage and alert.status != 'RESOLVED' %}
+      <div class="input-group input-group-sm">
+        <select class="form-select" name="technician"><option value="">Giao cho kỹ thuật viên...</option>
+          {% for t in technicians %}<option value="{{ t.id }}">{{ t.username }}</option>{% endfor %}</select>
+        <button name="action" value="assign" class="btn btn-outline-dark">Giao việc (tạo phiếu bảo trì)</button>
+      </div>{% endif %}
+    </form>
+  </div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Phiếu bảo trì liên quan</div><ul class="list-group list-group-flush">
+    {% for t in tickets %}<li class="list-group-item d-flex justify-content-between"><a href="{% url 'maintenance_detail' t.id %}">#{{ t.id }} {{ t.maintenance_type }}</a><span class="badge text-bg-{{ t.status|badge }}">{{ t.status }}</span></li>
+    {% empty %}<li class="list-group-item text-muted">Chưa có phiếu nào</li>{% endfor %}</ul></div></div>
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Lịch sử thao tác</div><ul class="list-group list-group-flush">
+    {% for h in history %}<li class="list-group-item small"><b>{{ h.action }}</b> bởi {{ h.user.username|default:"hệ thống" }} lúc {{ h.created_at|date:"d/m H:i" }}<div class="text-muted">{{ h.new_value|default:"" }}</div></li>
+    {% empty %}<li class="list-group-item text-muted">Chưa có thao tác</li>{% endfor %}</ul></div></div>
+</div>
+{% endblock %}
