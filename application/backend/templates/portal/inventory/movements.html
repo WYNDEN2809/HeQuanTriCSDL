@@ -1,0 +1,29 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Lịch sử tồn kho - ScentStation{% endblock %}
+{% block page_title %}Lịch sử nạp / xuất kho{% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='csv' %}">CSV</a>
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='xlsx' %}">Excel</a>
+{% endblock %}
+{% block portal_content %}
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-2"><input type="date" class="form-control" name="from" value="{{ d_from }}"></div>
+  <div class="col-md-2"><input type="date" class="form-control" name="to" value="{{ d_to }}"></div>
+  <div class="col-md-3"><select class="form-select" name="machine"><option value="">Mọi máy</option>
+    {% for m in machines %}<option value="{{ m.id }}" {% if m.id|stringformat:"s" == machine %}selected{% endif %}>{{ m.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><select class="form-select" name="type"><option value="">Mọi loại</option>
+    {% for v, l in types %}<option value="{{ v }}" {% if v == type %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><button class="btn btn-dark">Lọc</button></div>
+</form>
+<div class="card shadow-sm"><div class="table-responsive"><table class="table table-sm mb-0">
+  <thead><tr><th>Thời gian</th><th>Máy / slot</th><th>Mùi hương</th><th>Loại</th><th class="text-end">Trước</th><th class="text-end">Sau</th><th class="text-end">Thay đổi</th><th>Lý do</th><th>Người làm</th></tr></thead>
+  <tbody>{% for l in page_obj %}<tr>
+    <td>{{ l.created_at|date:"d/m H:i:s" }}</td><td>{{ l.machine_slot.machine.name }} / {{ l.machine_slot.slot_number }}</td><td>{{ l.machine_slot.perfume.name }}</td>
+    <td>{{ l.change_type }}</td><td class="text-end">{{ l.quantity_before }}</td><td class="text-end">{{ l.quantity_after }}</td>
+    <td class="text-end {% if l.change_amount < 0 %}text-danger{% else %}text-success{% endif %}">{{ l.change_amount }}</td>
+    <td>{{ l.reason|default:"" }}</td><td>{{ l.user.username|default:"-" }}</td></tr>
+  {% empty %}<tr><td colspan="9" class="text-muted">Không có dữ liệu trong khoảng đã chọn.</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% include "portal/_pagination.html" %}
+{% endblock %}

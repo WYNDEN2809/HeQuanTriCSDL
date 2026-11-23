@@ -1,0 +1,16 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Cấu hình slot - ScentStation{% endblock %}
+{% block page_title %}Cấu hình slot {{ slot.slot_number }} - {{ slot.machine.name }}{% endblock %}
+{% block portal_content %}
+<div class="row"><div class="col-lg-6">
+  <div class="card shadow-sm"><div class="card-body">
+    <p class="text-muted">Mùi hương: <b>{{ slot.perfume.name }}</b>. Để đổi mùi hương hãy dùng chức năng "Thay chai" trong mục Tồn kho.
+    Thay đổi cấu hình là thao tác nhạy cảm và được ghi vào nhật ký audit.</p>
+    <form method="post">{% csrf_token %}
+      {% include "portal/_form_fields.html" %}
+      <button class="btn btn-dark">Lưu</button>
+      <a class="btn btn-outline-secondary" href="{% url 'machine_detail' slot.machine_id %}">Hủy</a>
+    </form>
+  </div></div>
+</div></div>
+{% endblock %}

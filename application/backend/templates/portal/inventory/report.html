@@ -1,13 +1,27 @@
 {% extends "portal/base_portal.html" %}
 {% load portal_extras %}
-{% block title %}Tồn kho - ScentStation{% endblock %}
-{% block page_title %}Tồn kho và lịch sử nạp{% endblock %}
+{% block title %}Báo cáo tồn kho - ScentStation{% endblock %}
+{% block page_title %}Báo cáo tồn kho ({{ days }} ngày gần nhất){% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='csv' %}">CSV</a>
+  <a class="btn btn-outline-success btn-sm" href="?{% qs export='1' format='xlsx' %}">Excel</a>
+{% endblock %}
 {% block portal_content %}
-<form method="get" class="row g-2 mb-3"><div class="col-md-5"><input class="form-control" name="q" value="{{ q }}" placeholder="Tìm máy hoặc mùi hương"></div><div class="col-auto"><button class="btn btn-dark">Lọc</button></div></form>
-<div class="card shadow-sm mb-3"><div class="card-header">Khe sắp hết / hết</div><div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Máy</th><th>Địa điểm</th><th>Khe</th><th>Mùi hương</th><th>Còn lại</th><th>Trạng thái</th></tr></thead><tbody>
-{% for s in low_slots %}<tr><td>{{ s.machine.name }}</td><td>{{ s.machine.location.name }}</td><td>{{ s.slot_number }}</td><td>{{ s.perfume.name }}</td><td>{{ s.quantity }} / {{ s.capacity }}</td><td><span class="badge text-bg-{{ s.status|badge }}">{{ s.status }}</span></td><td>{% if request.brand_role == 'INVENTORY_STAFF' or request.brand_role == 'OPS_MANAGER' or request.brand_role == 'BRAND_ADMIN' or user.is_platform_admin %}<form method="post" action="{% url 'inv_refill' s.id %}" class="d-flex gap-1">{% csrf_token %}<input class="form-control form-control-sm" type="number" min="1" name="quantity" placeholder="Số lượt" required><button class="btn btn-sm btn-outline-primary">Nạp</button></form>{% endif %}</td></tr>{% empty %}<tr><td colspan="7" class="text-muted">Không có khe tồn kho thấp.</td></tr>{% endfor %}</tbody></table></div></div>
-{% include "portal/_pagination.html" with page_obj=low_slots %}
-<div class="card shadow-sm"><div class="card-header">Lịch sử biến động tồn kho</div><div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Thời gian</th><th>Máy / khe</th><th>Mùi hương</th><th>Loại</th><th>Trước</th><th>Sau</th><th>Người thực hiện</th></tr></thead><tbody>
-{% for x in logs %}<tr><td>{{ x.created_at|date:"d/m/Y H:i" }}</td><td>{{ x.machine_slot.machine.name }} / {{ x.machine_slot.slot_number }}</td><td>{{ x.machine_slot.perfume.name }}</td><td>{{ x.change_type }}</td><td>{{ x.quantity_before }}</td><td>{{ x.quantity_after }}</td><td>{{ x.user.username|default:"Hệ thống" }}</td></tr>{% empty %}<tr><td colspan="7" class="text-muted">Chưa có lịch sử.</td></tr>{% endfor %}</tbody></table></div></div>
-{% include "portal/_pagination.html" with page_obj=logs %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Theo mùi hương</div><div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th>Mùi hương</th><th class="text-end">Tồn ước tính</th><th class="text-end">Đã bán</th></tr></thead>
+    <tbody>{% for p in perfume_rows %}<tr><td>{{ p.name }}</td><td class="text-end">{{ p.quantity|money }}</td><td class="text-end">{{ p.sold|money }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="text-muted">Không có dữ liệu</td></tr>{% endfor %}</tbody></table></div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm border-warning"><div class="card-header">Slot cần nạp (sắp hết hoặc dưới 3 ngày dùng)</div><div class="table-responsive"><table class="table table-sm mb-0">
+    <thead><tr><th>Máy / slot</th><th>Mùi hương</th><th class="text-end">Tồn</th><th class="text-end">Còn dùng (ngày)</th></tr></thead>
+    <tbody>{% for r in need_refill %}<tr><td>{{ r.slot.machine.name }} / {{ r.slot.slot_number }}</td><td>{{ r.slot.perfume.name }}</td>
+      <td class="text-end">{{ r.slot.quantity }}</td><td class="text-end">{{ r.days_left|default:"-" }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-muted">Chưa có slot nào cần nạp</td></tr>{% endfor %}</tbody></table></div></div></div>
+</div>
+<div class="card shadow-sm"><div class="card-header">Chi tiết từng slot</div><div class="table-responsive"><table class="table table-sm mb-0">
+  <thead><tr><th>Máy</th><th>Slot</th><th>Mùi hương</th><th class="text-end">Tồn</th><th>Trạng thái</th><th class="text-end">Đã bán</th><th class="text-end">TB/ngày</th><th class="text-end">Còn dùng (ngày)</th></tr></thead>
+  <tbody>{% for r in rows %}<tr><td>{{ r.slot.machine.name }}</td><td>{{ r.slot.slot_number }}</td><td>{{ r.slot.perfume.name }}</td>
+    <td class="text-end">{{ r.slot.quantity }}/{{ r.slot.capacity }}</td><td><span class="badge text-bg-{{ r.slot.status|badge }}">{{ r.slot.status }}</span></td>
+    <td class="text-end">{{ r.sold }}</td><td class="text-end">{{ r.daily }}</td><td class="text-end">{{ r.days_left|default:"-" }}</td></tr>{% endfor %}</tbody>
+</table></div></div>
 {% endblock %}
