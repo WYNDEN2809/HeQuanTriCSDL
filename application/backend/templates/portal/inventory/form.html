@@ -1,0 +1,14 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}{{ title }} - ScentStation{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block portal_content %}
+<div class="row"><div class="col-lg-6"><div class="card shadow-sm"><div class="card-body">
+  <p class="text-muted mb-3">Máy <b>{{ slot.machine.name }}</b>, slot <b>{{ slot.slot_number }}</b> ({{ slot.perfume.name }}).
+     Tồn kho ước tính hiện tại: <b>{{ slot.quantity }}</b> / {{ slot.capacity }} lần xịt.</p>
+  <form method="post">{% csrf_token %}
+    {% include "portal/_form_fields.html" %}
+    <button class="btn btn-dark">Lưu</button>
+    <a class="btn btn-outline-secondary" href="{% url 'inv_slots' %}">Hủy</a>
+  </form>
+</div></div></div></div>
+{% endblock %}
