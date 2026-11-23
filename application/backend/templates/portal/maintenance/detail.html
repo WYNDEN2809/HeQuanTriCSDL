@@ -1,9 +1,96 @@
 {% extends "portal/base_portal.html" %}
 {% load portal_extras %}
 {% block title %}Phiếu #{{ ticket.id }} - ScentStation{% endblock %}
+<<<<<<< HEAD
 {% block page_title %}Phiếu bảo trì #{{ ticket.id }} <span class="badge text-bg-{{ ticket.status|badge }}">{{ ticket.status }}</span>{% endblock %}
 {% block page_actions %}<a href="{% url 'maintenance_list' %}" class="btn btn-outline-secondary btn-sm">Danh sách</a>{% endblock %}
 {% block portal_content %}
 <div class="card shadow-sm mb-3"><div class="card-body"><p><b>Máy:</b> {{ ticket.machine.name }} · {{ ticket.machine.location.name }}</p><p><b>Loại:</b> {{ ticket.maintenance_type }}</p><p><b>Người tạo:</b> {{ ticket.created_by.username }} · <b>Kỹ thuật viên:</b> {{ ticket.assigned_to.username|default:"Chưa giao" }}</p><p><b>Tạo lúc:</b> {{ ticket.created_at|date:"d/m/Y H:i" }} · <b>Hoàn tất:</b> {{ ticket.completed_at|date:"d/m/Y H:i"|default:"-" }}</p><pre class="mb-0">{{ ticket.description|default:"Không có mô tả." }}</pre></div></div>
 {% if can_work and ticket.status != 'COMPLETED' and ticket.status != 'CANCELLED' %}<form method="post" action="{% url 'maintenance_action' ticket.id %}" class="card card-body shadow-sm">{% csrf_token %}<label class="form-label" for="note">Kết quả / ghi chú</label><textarea class="form-control mb-2" name="note" id="note" maxlength="500"></textarea><div class="d-flex gap-2">{% if ticket.status == 'OPEN' %}<button class="btn btn-primary" name="action" value="start">Bắt đầu xử lý</button>{% endif %}{% if ticket.status == 'IN_PROGRESS' %}<button class="btn btn-success" name="action" value="complete">Hoàn tất</button>{% endif %}{% if request.brand_role == 'OPS_MANAGER' or request.brand_role == 'BRAND_ADMIN' or user.is_platform_admin %}<button class="btn btn-outline-danger" name="action" value="cancel">Hủy phiếu</button>{% endif %}</div></form>{% endif %}
+=======
+{% block page_title %}Phiếu #{{ ticket.id }} <span class="badge text-bg-{{ ticket.status|badge }}">{{ ticket.status }}</span> <span class="badge text-bg-{{ priority|badge }}">{{ priority }}</span>{% if overdue %} <span class="badge text-bg-danger">Quá hạn</span>{% endif %}{% endblock %}
+{% block page_actions %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'mt_list' %}">&laquo; Danh sách</a>{% endblock %}
+{% block portal_content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div><b>Máy:</b> <a href="{% url 'machine_detail' ticket.machine_id %}">{{ ticket.machine.name }}</a> <span class="badge text-bg-{{ ticket.machine.status|badge }}">{{ ticket.machine.status }}</span></div>
+    <div><b>Loại:</b> {{ ticket.maintenance_type }}</div>
+    <div><b>Mô tả:</b> {{ text }}</div>
+    {% if ticket.alert %}<div><b>Cảnh báo gốc:</b> <a href="{% url 'alert_detail' ticket.alert_id %}">#{{ ticket.alert_id }} {{ ticket.alert.alert_type }}</a></div>{% endif %}
+    <div><b>Tạo bởi:</b> {{ ticket.created_by.username }} lúc {{ ticket.created_at|date:"d/m H:i" }}</div>
+    <div><b>Giao cho:</b> {{ ticket.assigned_to.username|default:"(chưa giao)" }}</div>
+    <div><b>Hạn xử lý:</b> {{ due|date:"d/m/Y H:i" }} &nbsp; <b>Hoàn thành:</b> {{ ticket.completed_at|date:"d/m H:i"|default:"-" }}</div>
+    <div class="progress mt-2" style="height:14px"><div class="progress-bar bg-success" style="width:{{ progress }}%">{{ done }}/{{ total }}</div></div>
+  </div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div class="fw-semibold mb-2">Thao tác</div>
+    {% if is_open %}
+    {% if can_manage %}
+    <form method="post" action="{% url 'mt_action' ticket.id %}" class="input-group input-group-sm mb-2">{% csrf_token %}
+      <select class="form-select" name="technician"><option value="">Giao cho...</option>{% for id, name in technicians %}<option value="{{ id }}">{{ name }}</option>{% endfor %}</select>
+      <button name="action" value="assign" class="btn btn-outline-dark">Giao việc</button></form>
+    <form method="post" action="{% url 'mt_action' ticket.id %}" class="input-group input-group-sm mb-2">{% csrf_token %}
+      <select class="form-select" name="priority">{% for v, l in priorities %}<option value="{{ v }}" {% if v == priority %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+      <button name="action" value="priority" class="btn btn-outline-dark">Đổi ưu tiên</button></form>
+    <form method="post" action="{% url 'mt_action' ticket.id %}" class="input-group input-group-sm mb-2">{% csrf_token %}
+      <input class="form-control" name="note" placeholder="Lý do hủy phiếu" maxlength="500">
+      <button name="action" value="cancel" class="btn btn-outline-danger" onclick="return confirm('Hủy phiếu này?')">Hủy phiếu</button></form>
+    {% endif %}
+    {% if can_execute and ticket.status == 'OPEN' %}
+    <form method="post" action="{% url 'mt_action' ticket.id %}">{% csrf_token %}
+      <button name="action" value="start" class="btn btn-warning btn-sm">Bắt đầu bảo trì (đưa máy vào chế độ bảo trì)</button></form>
+    {% endif %}
+    {% if can_execute and ticket.status == 'IN_PROGRESS' %}
+    <form method="post" action="{% url 'mt_action' ticket.id %}">{% csrf_token %}
+      <button name="action" value="complete" class="btn btn-success btn-sm" onclick="return confirm('Đóng phiếu và trả máy về hoạt động?')">Hoàn tất phiếu</button></form>
+    {% endif %}
+    {% else %}<div class="text-muted">Phiếu đã đóng.</div>{% endif %}
+  </div></div></div>
+</div>
+
+{% for phase, items in phases.items %}
+<div class="card shadow-sm mb-3"><div class="card-header">{{ phase }}</div><ul class="list-group list-group-flush">
+  {% for it in items %}<li class="list-group-item">
+    {% if it.phase == 'RESULT' %}
+      <div class="mb-1">{% if it.is_done %}<span class="text-success">✔</span>{% else %}<span class="text-muted">○</span>{% endif %} <b>{{ it.item_text }}</b></div>
+      {% if it.note %}<div class="small bg-light p-2 rounded">{{ it.note }}</div>{% endif %}
+      {% if can_execute and ticket.status == 'IN_PROGRESS' %}
+      <form method="post" action="{% url 'mt_action' ticket.id %}" class="mt-2">{% csrf_token %}
+        <textarea class="form-control form-control-sm mb-1" name="text" rows="2" maxlength="500" placeholder="Hiện tượng, hành động, linh kiện thay, chi phí...">{{ it.note|default:"" }}</textarea>
+        <button name="action" value="result" class="btn btn-outline-primary btn-sm">Ghi kết quả</button></form>{% endif %}
+    {% else %}
+      <div class="d-flex justify-content-between align-items-center">
+        <span>{% if it.is_done %}<span class="text-success">✔</span>{% else %}<span class="text-muted">○</span>{% endif %} {{ it.item_text }}
+          {% if it.is_done %}<small class="text-muted">({{ it.done_by.username|default:"" }} {{ it.done_at|date:"d/m H:i" }})</small>{% endif %}
+          {% if it.note %}<div class="small text-muted">{{ it.note }}</div>{% endif %}</span>
+        {% if can_execute and ticket.status == 'IN_PROGRESS' and it.item_text != post_test_text %}
+        <form method="post" action="{% url 'mt_action' ticket.id %}" class="d-flex gap-1">{% csrf_token %}
+          <input type="hidden" name="item_id" value="{{ it.id }}">
+          <input class="form-control form-control-sm" name="note" placeholder="Ghi chú" maxlength="500" style="width:180px">
+          {% if it.is_done %}<button name="action" value="item" class="btn btn-outline-secondary btn-sm">Bỏ tick</button>
+          {% else %}<input type="hidden" name="done" value="on"><button name="action" value="item" class="btn btn-outline-success btn-sm">Xong</button>{% endif %}
+        </form>{% endif %}
+      </div>
+    {% endif %}
+  </li>{% endfor %}
+</ul></div>
+{% endfor %}
+
+{% if can_execute and ticket.status == 'IN_PROGRESS' %}
+<div class="card shadow-sm mb-3 border-warning"><div class="card-header">Xịt thử (ghi riêng, không tính doanh thu)</div><div class="card-body">
+  <form method="post" action="{% url 'mt_action' ticket.id %}" class="row g-2">{% csrf_token %}
+    <div class="col-md-3"><select name="slot" class="form-select form-select-sm">{% for s in slots %}<option value="{{ s.id }}">Slot {{ s.slot_number }} (còn {{ s.quantity }})</option>{% endfor %}</select></div>
+    <div class="col-md-3"><select name="purpose" class="form-select form-select-sm"><option value="diag">Xịt thử chẩn đoán</option><option value="post">Xịt thử sau bảo trì</option></select></div>
+    <div class="col-md-2"><div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="passed" id="passed" checked><label class="form-check-label" for="passed">Đạt</label></div></div>
+    <div class="col-md-4"><input class="form-control form-control-sm" name="note" placeholder="Ghi chú" maxlength="500"></div>
+    <div class="col-md-5"><input type="password" class="form-control form-control-sm" name="confirm_password" placeholder="Nhập lại mật khẩu để xác nhận" autocomplete="current-password"></div>
+    <div class="col-md-3"><button name="action" value="spray" class="btn btn-warning btn-sm">Xịt thử</button></div>
+    {% for e in spray_form.confirm_password.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </form></div></div>
+{% endif %}
+
+<div class="card shadow-sm"><div class="card-header">Lịch sử thao tác</div><ul class="list-group list-group-flush">
+  {% for h in history %}<li class="list-group-item small"><b>{{ h.action }}</b> · {{ h.user.username|default:"hệ thống" }} · {{ h.created_at|date:"d/m H:i" }}<div class="text-muted">{{ h.new_value|default:""|truncatechars:200 }}</div></li>
+  {% empty %}<li class="list-group-item text-muted">Chưa có</li>{% endfor %}</ul></div>
+>>>>>>> origin/main
 {% endblock %}

@@ -45,3 +45,36 @@ class MaintenanceRecord(models.Model):
 
     def __str__(self):
         return f"Ticket {self.id} ({self.maintenance_type}) - {self.status}"
+
+
+class MaintenanceChecklistItem(models.Model):
+    """Muc checklist cua phieu bao tri (bang bo sung 05_AddMaintenanceChecklist.sql)."""
+
+    class Phase(models.TextChoices):
+        INSPECTION = "INSPECTION", "Kiem tra"
+        REPAIR = "REPAIR", "Sua chua"
+        REFILL_SUPPORT = "REFILL_SUPPORT", "Ho tro nap chai"
+        POST_MAINTENANCE = "POST_MAINTENANCE", "Sau bao tri"
+        RESULT = "RESULT", "Ket qua"
+
+    id = models.AutoField(primary_key=True, db_column="ChecklistItemID")
+    record = models.ForeignKey(
+        MaintenanceRecord, models.CASCADE, db_column="MaintenanceRecordID", related_name="checklist_items"
+    )
+    phase = models.CharField(max_length=20, choices=Phase.choices)
+    item_text = models.CharField(max_length=200)
+    is_done = models.BooleanField(default=False)
+    done_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, models.SET_NULL, db_column="DoneByUserID", related_name="+", blank=True, null=True
+    )
+    done_at = models.DateTimeField(blank=True, null=True)
+    note = models.CharField(max_length=500, blank=True, null=True)
+    sort_order = models.IntegerField(default=0)
+
+    class Meta:
+        managed = False
+        db_table = "MaintenanceChecklistItem"
+        ordering = ["sort_order", "id"]
+
+    def __str__(self):
+        return f"[{self.phase}] {self.item_text}"
