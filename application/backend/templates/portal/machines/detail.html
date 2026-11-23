@@ -1,0 +1,64 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}{{ machine.name }} - ScentStation{% endblock %}
+{% block page_title %}{{ machine.name }} <span class="badge text-bg-{{ machine.status|badge }}">{{ machine.status }}</span>{% endblock %}
+{% block page_actions %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'machine_list' %}">&laquo; Danh sách</a>{% endblock %}
+{% block portal_content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div><b>Serial:</b> <code>{{ machine.serial_number }}</code></div>
+    <div><b>Thương hiệu:</b> {{ machine.brand.name }}</div>
+    <div><b>Địa điểm:</b> {{ machine.location.name }} <span class="text-muted small">{{ machine.location.address|default:"" }}</span></div>
+    <div><b>Kết nối:</b> {{ connectivity }} (lần cuối: {{ machine.last_seen_at|date:"d/m/Y H:i:s"|default:"chưa có" }})</div>
+  </div></div></div>
+  <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
+    <div class="fw-semibold mb-2">Thao tác</div>
+    {% if can_toggle or can_maint %}
+    <form method="post" action="{% url 'machine_action' machine.id %}" class="row g-2 align-items-center">
+      {% csrf_token %}
+      <div class="col-12"><input class="form-control form-control-sm" name="reason" maxlength="200" placeholder="Lý do (bắt buộc khi tắt máy)"></div>
+      <div class="col-12 d-flex flex-wrap gap-2">
+        {% if can_toggle %}
+          {% if machine.status == 'DISABLED' %}<button name="action" value="enable" class="btn btn-success btn-sm">Bật lại máy</button>
+          {% else %}<button name="action" value="disable" class="btn btn-danger btn-sm" onclick="return confirm('Tắt máy này? Khách sẽ không đặt được đơn.')">Tắt máy</button>{% endif %}
+        {% endif %}
+        {% if can_maint %}
+          {% if machine.status == 'MAINTENANCE' or machine.status == 'ERROR' %}<button name="action" value="maintenance_off" class="btn btn-outline-success btn-sm">Kết thúc bảo trì</button>
+          {% elif machine.status != 'DISABLED' %}<button name="action" value="maintenance_on" class="btn btn-warning btn-sm">Vào chế độ bảo trì</button>{% endif %}
+        {% endif %}
+      </div>
+    </form>
+    {% else %}<div class="text-muted">Bạn chỉ có quyền xem.</div>{% endif %}
+  </div></div></div>
+</div>
+
+<div class="card shadow-sm mb-3"><div class="card-header">Slot</div>
+<div class="table-responsive"><table class="table table-sm align-middle mb-0">
+  <thead><tr><th>#</th><th>Mùi hương</th><th>Tồn kho ước tính</th><th>Giá</th><th>Ngưỡng</th><th>Xịt (ms)</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>
+  {% for s in slots %}<tr>
+    <td>{{ s.slot_number }}</td><td>{{ s.perfume.name }}</td>
+    <td>{{ s.quantity }} / {{ s.capacity }}</td><td>{{ s.price_per_spray|money }}</td><td>{{ s.low_stock_threshold }}</td><td>{{ s.spray_duration }}</td>
+    <td><span class="badge text-bg-{{ s.status|badge }}">{{ s.status }}</span></td>
+    <td class="text-end">
+      {% if can_config %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'machine_slot_config' s.id %}">Cấu hình</a>{% endif %}
+      {% if can_toggle %}
+      <form method="post" action="{% url 'machine_slot_action' s.id %}" class="d-inline">{% csrf_token %}
+        {% if s.status == 'DISABLED' %}<button name="action" value="enable" class="btn btn-outline-success btn-sm">Bật</button>
+        {% else %}<input type="hidden" name="reason" value="Tat thu cong"><button name="action" value="disable" class="btn btn-outline-danger btn-sm">Tắt</button>{% endif %}
+      </form>{% endif %}
+    </td></tr>{% endfor %}
+  </tbody></table></div></div>
+
+<div class="row g-3">
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Cảnh báo chưa xử lý</div><ul class="list-group list-group-flush">
+    {% for a in alerts %}<li class="list-group-item d-flex justify-content-between"><span>{{ a.alert_type }} <span class="badge text-bg-{{ a.severity|badge }}">{{ a.severity }}</span></span><span class="text-muted small">{{ a.created_at|date:"d/m H:i" }}</span></li>
+    {% empty %}<li class="list-group-item text-muted">Không có</li>{% endfor %}</ul></div></div>
+  <div class="col-md-6"><div class="card shadow-sm"><div class="card-header">Phiếu bảo trì gần đây</div><ul class="list-group list-group-flush">
+    {% for t in tickets %}<li class="list-group-item d-flex justify-content-between"><span>#{{ t.id }} {{ t.maintenance_type }}</span><span class="badge text-bg-{{ t.status|badge }}">{{ t.status }}</span></li>
+    {% empty %}<li class="list-group-item text-muted">Không có</li>{% endfor %}</ul></div></div>
+  <div class="col-12"><div class="card shadow-sm"><div class="card-header">Sự kiện thiết bị gần đây</div><ul class="list-group list-group-flush">
+    {% for e in events %}<li class="list-group-item d-flex justify-content-between"><span><code>{{ e.event_type }}</code> {{ e.message|default:"" }}</span><span class="text-muted small">{{ e.created_at|date:"d/m H:i:s" }}</span></li>
+    {% empty %}<li class="list-group-item text-muted">Không có</li>{% endfor %}</ul></div></div>
+</div>
+{% endblock %}
