@@ -1,0 +1,35 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Nước hoa và địa điểm - ScentStation{% endblock %}
+{% block page_title %}Nước hoa và địa điểm{% endblock %}
+{% block page_actions %}{% if can_manage and brand %}<a class="btn btn-outline-dark btn-sm" href="{% url 'catalog_brand_profile' %}">Thông tin thương hiệu</a>{% endif %}{% endblock %}
+{% block portal_content %}
+{% if show_brand %}<div class="alert alert-info">Đang xem tất cả thương hiệu. Chọn một thương hiệu ở thanh trên cùng để thêm/sửa.</div>{% endif %}
+<div class="card shadow-sm mb-3"><div class="card-header d-flex justify-content-between"><span>Nước hoa</span>
+  {% if can_manage and not show_brand %}<a class="btn btn-dark btn-sm" href="{% url 'catalog_perfume_new' %}">+ Thêm</a>{% endif %}</div>
+  <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+  <thead><tr>{% if show_brand %}<th>Thương hiệu</th>{% endif %}<th>Tên</th><th>Mô tả</th><th class="text-end">Giá/lần xịt</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>{% for p in perfumes %}<tr>{% if show_brand %}<td>{{ p.brand.name }}</td>{% endif %}<td>{{ p.name }}</td><td class="small text-muted">{{ p.description|default:""|truncatechars:70 }}</td>
+    <td class="text-end">{{ p.price_per_spray|money }}</td><td>{% if p.is_active %}<span class="badge text-bg-success">Kinh doanh</span>{% else %}<span class="badge text-bg-secondary">Ngưng</span>{% endif %}</td>
+    <td class="text-end">{% if can_manage %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'catalog_perfume_edit' p.id %}">Sửa</a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-muted">Chưa có nước hoa.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card shadow-sm mb-3"><div class="card-header d-flex justify-content-between"><span>Khuyến mãi / dùng thử / giá tạm thời</span>
+  {% if can_manage and not show_brand %}<a class="btn btn-dark btn-sm" href="{% url 'catalog_campaign_new' %}">+ Thêm</a>{% endif %}</div>
+  <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+  <thead><tr>{% if show_brand %}<th>Thương hiệu</th>{% endif %}<th>Tên</th><th>Nội dung</th><th>Phạm vi</th><th>Thời gian</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>{% for c in campaigns %}<tr>{% if show_brand %}<td>{{ c.brand.name }}</td>{% endif %}<td>{{ c.name }}</td><td>{{ c.summary }}</td>
+    <td class="small">{{ c.perfume.name|default:"Mọi nước hoa" }} · {{ c.location.name|default:"mọi địa điểm" }}</td>
+    <td class="small">{{ c.starts_at|date:"d/m/Y H:i" }} → {{ c.ends_at|date:"d/m/Y H:i" }}</td>
+    <td>{% if c.running %}<span class="badge text-bg-success">Đang chạy</span>{% elif c.is_active %}<span class="badge text-bg-warning">Ngoài thời gian</span>{% else %}<span class="badge text-bg-secondary">Tắt</span>{% endif %}</td>
+    <td class="text-end">{% if can_manage %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'catalog_campaign_edit' c.id %}">Sửa</a>
+      <form method="post" action="{% url 'catalog_campaign_toggle' c.id %}" class="d-inline">{% csrf_token %}<button class="btn btn-outline-dark btn-sm">{% if c.is_active %}Tắt{% else %}Bật{% endif %}</button></form>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="7" class="text-muted">Chưa có chương trình khuyến mãi.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card shadow-sm"><div class="card-header d-flex justify-content-between"><span>Địa điểm</span>
+  {% if can_manage and not show_brand %}<a class="btn btn-dark btn-sm" href="{% url 'catalog_location_new' %}">+ Thêm</a>{% endif %}</div>
+  <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+  <thead><tr>{% if show_brand %}<th>Thương hiệu</th>{% endif %}<th>Tên</th><th>Địa chỉ</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>{% for l in locations %}<tr>{% if show_brand %}<td>{{ l.brand.name }}</td>{% endif %}<td>{{ l.name }}</td><td class="small">{{ l.address|default:"" }}</td>
+    <td>{% if l.is_active %}<span class="badge text-bg-success">Hoạt động</span>{% else %}<span class="badge text-bg-secondary">Ngưng</span>{% endif %}</td>
+    <td class="text-end">{% if can_manage %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'catalog_location_edit' l.id %}">Sửa</a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="5" class="text-muted">Chưa có địa điểm.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}
