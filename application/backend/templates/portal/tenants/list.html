@@ -1,0 +1,11 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Thương hiệu - ScentStation{% endblock %}
+{% block page_title %}Quản lý thương hiệu (tenant){% endblock %}
+{% block page_actions %}<a class="btn btn-dark btn-sm" href="{% url 'tenant_create' %}">+ Thêm thương hiệu</a>{% endblock %}
+{% block portal_content %}
+<div class="card shadow-sm"><div class="table-responsive"><table class="table table-sm align-middle mb-0">
+  <thead><tr><th>Thương hiệu</th><th class="text-end">Nhân viên</th><th class="text-end">Máy</th><th class="text-end">Nước hoa</th><th class="text-end">Địa điểm</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>{% for b in brands %}<tr><td>{{ b.name }}</td><td class="text-end">{{ b.n_members }}</td><td class="text-end">{{ b.n_machines }}</td><td class="text-end">{{ b.n_perfumes }}</td><td class="text-end">{{ b.n_locations }}</td>
+    <td>{% if b.is_active %}<span class="badge text-bg-success">Hoạt động</span>{% else %}<span class="badge text-bg-secondary">Tạm ngưng</span>{% endif %}</td>
+    <td class="text-end"><a class="btn btn-outline-dark btn-sm" href="{% url 'tenant_detail' b.id %}">Quản lý</a></td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}
