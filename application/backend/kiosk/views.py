@@ -7,7 +7,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from devices.models import Machine
+from catalog.campaign_services import describe as describe_campaign
+from catalog.campaign_services import effective_price
+from devices.models import Machine, MachineSlot
 from devices.services import can_accept_orders, machine_connectivity
 from sales.models import Order
 from sales.services import OrderError, cancel_order, create_order, expire_stale, order_stage
@@ -44,11 +46,29 @@ def machines(request):
 def machine_home(request, machine_id):
     machine = get_object_or_404(Machine.objects.select_related("brand", "location"), pk=machine_id)
     ready = can_accept_orders(machine)
-    slots = list(machine.slots.select_related("perfume").order_by("slot_number"))
+    slots = list(machine.slots.select_related("perfume", "machine").order_by("slot_number"))
+    now = timezone.now()
     for s in slots:
         s.orderable = ready and s.is_available
+        s.final_price, s.campaign = effective_price(s, now)       # gia sau khuyen mai (neu co)
+        s.campaign_text = describe_campaign(s.campaign) if s.campaign else ""
+        s.info_url = request.build_absolute_uri(reverse("kiosk_info", args=[s.pk]))   # QR san pham
     return render(request, "kiosk/machine.html", {
         "machine": machine, "slots": slots, "ready": ready, "idle_seconds": settings.KIOSK_IDLE_SECONDS,
+    })
+
+
+def info_page(request, slot_id):
+    """Trang thong tin san pham - khach quet ma QR tren man hinh kiosk bang dien thoai (khong can dang nhap)."""
+    slot = get_object_or_404(
+        MachineSlot.objects.select_related("perfume__brand", "machine__brand", "machine__location"), pk=slot_id
+    )
+    final_price, campaign = effective_price(slot, timezone.now())
+    return render(request, "kiosk/info.html", {
+        "slot": slot, "perfume": slot.perfume, "brand": slot.machine.brand, "machine": slot.machine,
+        "final_price": final_price, "campaign": campaign,
+        "campaign_text": describe_campaign(campaign) if campaign else "",
+        "ready": can_accept_orders(slot.machine) and slot.is_available,
     })
 
 
@@ -65,7 +85,7 @@ def create_order_view(request, machine_id):
 def order_page(request, reference):
     expire_stale()
     order = get_object_or_404(
-        Order.objects.select_related("perfume", "machine_slot__machine__brand", "machine_slot__machine__location"),
+        Order.objects.select_related("perfume", "campaign", "machine_slot__machine__brand", "machine_slot__machine__location"),
         payment_reference=reference,
     )
     pay_url = ""
