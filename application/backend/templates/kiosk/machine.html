@@ -18,10 +18,18 @@
       <div class="small text-secondary">Slot {{ s.slot_number }}</div>
       <div class="fs-4 gold">{{ s.perfume.name }}</div>
       <div class="text-secondary small flex-grow-1 my-2">{{ s.perfume.description|default:"" }}</div>
-      <div class="price mb-3">{{ s.price_per_spray|floatformat:0|intcomma }} ₫</div>
+      {% if s.campaign %}<div><span class="badge text-bg-warning">{{ s.campaign.name }} · {{ s.campaign_text }}</span></div>{% endif %}
+      <div class="price mb-3">
+        {% if s.campaign %}<small class="text-secondary text-decoration-line-through fs-6">{{ s.price_per_spray|floatformat:0|intcomma }} ₫</small><br>{% endif %}
+        {% if s.final_price == 0 %}Miễn phí{% else %}{{ s.final_price|floatformat:0|intcomma }} ₫{% endif %}
+      </div>
+      <div class="d-flex align-items-center gap-2 mb-3 small text-secondary">
+        <div class="bg-white p-1 rounded slot-qr" data-url="{{ s.info_url }}"></div>
+        <div>Quét mã QR để xem thông tin sản phẩm trên điện thoại</div>
+      </div>
       {% if s.orderable %}
       <button class="btn btn-gold w-100 btn-pick" data-slot="{{ s.id }}" data-name="{{ s.perfume.name }}"
-              data-price="{{ s.price_per_spray|floatformat:0|intcomma }}">Chọn mùi này</button>
+              data-price="{{ s.final_price|floatformat:0|intcomma }}">Chọn mùi này</button>
       {% else %}
       <button class="btn btn-gold w-100" disabled>{% if s.status == 'EMPTY' or s.quantity <= 0 %}Hết hàng{% else %}Tạm ngưng{% endif %}</button>
       {% endif %}
@@ -40,7 +48,7 @@
         <div class="modal-body p-4 text-center">
           <div class="text-secondary">Bạn đã chọn</div>
           <div class="fs-2 gold" id="confName"></div>
-          <div class="price my-2"><span id="confPrice"></span> ₫ / 1 lần xịt</div>
+          <div class="price my-2" id="confPriceBox"></div>
           <div class="d-flex gap-2 mt-4">
             <button type="button" class="btn btn-outline-light w-50" data-bs-dismiss="modal">Chọn lại</button>
             <button type="submit" class="btn btn-gold w-50">Xác nhận &amp; thanh toán</button>
@@ -52,12 +60,14 @@
 </div>
 {% endblock %}
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
+  document.querySelectorAll('.slot-qr').forEach(el => new QRCode(el, {text: el.dataset.url, width: 72, height: 72}));
   const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
   document.querySelectorAll('.btn-pick').forEach(b => b.addEventListener('click', () => {
     document.getElementById('slotInput').value = b.dataset.slot;
     document.getElementById('confName').textContent = b.dataset.name;
-    document.getElementById('confPrice').textContent = b.dataset.price;
+    document.getElementById('confPriceBox').textContent = b.dataset.price === '0' ? 'Miễn phí (1 lần xịt)' : b.dataset.price + ' ₫ / 1 lần xịt';
     modal.show();
   }));
   // Tu lam moi man hinh sau thoi gian khong thao tac (cap nhat tinh trang slot)

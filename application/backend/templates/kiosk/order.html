@@ -17,7 +17,10 @@
     <div class="slot-card p-4">
       <div class="text-secondary small">Mùi hương đã chọn</div>
       <div class="fs-3 gold">{{ order.perfume.name }}</div>
-      <div class="price mb-3">{{ order.amount|floatformat:0|intcomma }} ₫</div>
+      <div class="price mb-3">
+        {% if order.campaign_id %}<small class="text-secondary text-decoration-line-through fs-6">{{ order.unit_price|floatformat:0|intcomma }} ₫</small>
+        <span class="badge text-bg-warning fs-6">{{ order.campaign.name }}</span><br>{% endif %}
+        {% if order.amount == 0 %}Miễn phí{% else %}{{ order.amount|floatformat:0|intcomma }} ₫{% endif %}</div>
       <div id="statusBox" class="alert alert-info fs-5 mb-3">
         <div class="fw-bold" id="statusTitle">Đang tải...</div>
         <div id="statusMsg"></div>
