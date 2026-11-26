@@ -7,10 +7,6 @@ OPS = "OPS_MANAGER"
 TECH = "TECHNICIAN"
 INV = "INVENTORY_STAFF"
 VIEWER = "VIEWER"
-# Compatibility names used by the alert, inventory, and maintenance portal modules.
-OPS_MANAGER = OPS
-TECHNICIAN = TECH
-PLATFORM_ADMIN = "PLATFORM_ADMIN"
 ALL = (BRAND_ADMIN, OPS, TECH, INV, VIEWER)
 
 LABELS = {
