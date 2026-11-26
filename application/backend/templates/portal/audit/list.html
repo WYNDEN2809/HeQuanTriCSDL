@@ -1,0 +1,43 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Nhật ký audit - ScentStation{% endblock %}
+{% block page_title %}Nhật ký audit{% endblock %}
+{% block page_actions %}
+  <div class="btn-group">
+    <a class="btn btn-outline-success btn-sm" href="?{% qs format='csv' %}">Xuất CSV</a>
+    <a class="btn btn-outline-success btn-sm" href="?{% qs format='xlsx' %}">Xuất Excel</a>
+  </div>
+{% endblock %}
+{% block portal_content %}
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-3"><input class="form-control" type="search" name="q" value="{{ filters.q }}" placeholder="Hành động, đối tượng, người dùng hoặc mã"></div>
+  <div class="col-md-2"><input class="form-control" name="action" value="{{ filters.action }}" placeholder="Hành động"></div>
+  <div class="col-md-2"><input class="form-control" name="entity_type" value="{{ filters.entity_type }}" placeholder="Loại đối tượng"></div>
+  <div class="col-md-2"><input class="form-control" type="date" name="from" value="{{ filters.date_from }}" aria-label="Từ ngày"></div>
+  <div class="col-md-2"><input class="form-control" type="date" name="to" value="{{ filters.date_to }}" aria-label="Đến ngày"></div>
+  <div class="col-md-1 d-grid"><button class="btn btn-dark">Lọc</button></div>
+</form>
+<div class="card shadow-sm"><div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0">
+  <thead><tr><th>Thời gian</th><th>Người dùng</th><th>Hành động</th><th>Đối tượng</th><th>Thương hiệu</th><th>Thay đổi</th></tr></thead>
+  <tbody>
+  {% for entry in page_obj %}
+    <tr>
+      <td class="text-nowrap">{{ entry.created_at|date:"d/m/Y H:i:s" }}</td>
+      <td>{% if entry.user %}{{ entry.user.get_username }}{% else %}<span class="text-muted">Hệ thống</span>{% endif %}</td>
+      <td><span class="badge text-bg-secondary">{{ entry.action }}</span></td>
+      <td>{{ entry.entity_type|default:"—" }}{% if entry.entity_id %} #{{ entry.entity_id }}{% endif %}</td>
+      <td>{{ entry.brand.name|default:"—" }}</td>
+      <td>
+        {% if entry.old_value or entry.new_value %}
+          <details><summary>Xem chi tiết</summary>
+            {% if entry.old_value %}<div class="small"><strong>Cũ:</strong> <pre class="mb-1 text-wrap">{{ entry.old_value }}</pre></div>{% endif %}
+            {% if entry.new_value %}<div class="small"><strong>Mới:</strong> <pre class="mb-0 text-wrap">{{ entry.new_value }}</pre></div>{% endif %}
+          </details>
+        {% else %}<span class="text-muted">—</span>{% endif %}
+      </td>
+    </tr>
+  {% empty %}<tr><td colspan="6" class="text-muted">Không có bản ghi phù hợp.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% include "portal/_pagination.html" %}
+{% endblock %}
