@@ -1,0 +1,10 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Tạo tài khoản - ScentStation{% endblock %}
+{% block page_title %}Tạo tài khoản nhân viên{% endblock %}
+{% block portal_content %}
+<div class="row"><div class="col-lg-5"><div class="card shadow-sm"><div class="card-body">
+  <p class="text-muted small">Tài khoản được gắn với thương hiệu <b>{{ request.active_brand.name|default:"(chưa chọn)" }}</b>. Người dùng chỉ thấy dữ liệu của thương hiệu này.</p>
+  <form method="post">{% csrf_token %}{% include "portal/_form_fields.html" %}
+    <button class="btn btn-dark">Tạo</button> <a class="btn btn-outline-secondary" href="{% url 'people_list' %}">Hủy</a></form>
+</div></div></div></div>
+{% endblock %}
