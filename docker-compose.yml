@@ -1,0 +1,42 @@
+# SQL Server 2022 + tu dong nap database ScentStationDB (01..04). Chay: docker compose up -d
+# Mat khau sa phai du manh. Neu doi, nho doi DB_PASSWORD trong application/backend/.env
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: scentstation-db
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "ScentStation@2026Db"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - scentstation-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: scentstation-db-init
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./application/database:/sql:ro
+    # -f 65001: doc file SQL dang UTF-8 (co tieng Viet). Chi chay mot lan; muon nap lai: docker compose down -v
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        S="/opt/mssql-tools/bin/sqlcmd -S db -U sa -P ScentStation@2026Db -f 65001 -b"
+        for f in 01_CreateSchema 02_SeedMasterData 03_SeedOrders 04_SeedOperations; do
+          echo ">> chay $$f.sql"; $$S -i /sql/$$f.sql
+        done
+        echo "Hoan tat: database ScentStationDB da san sang."
+    restart: "no"
+
+volumes:
+  scentstation-data:
