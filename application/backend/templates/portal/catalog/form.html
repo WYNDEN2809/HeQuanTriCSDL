@@ -1,0 +1,9 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}{{ title }} - ScentStation{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block portal_content %}
+<div class="row"><div class="col-lg-6"><div class="card shadow-sm"><div class="card-body">
+  <form method="post">{% csrf_token %}{% include "portal/_form_fields.html" %}
+    <button class="btn btn-dark">Lưu</button> <a class="btn btn-outline-secondary" href="{% url 'catalog_home' %}">Hủy</a></form>
+</div></div></div></div>
+{% endblock %}

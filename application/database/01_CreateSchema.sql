@@ -1,5 +1,5 @@
 /* =====================================================================
-   Tao CSDL ScentStationDB + 16 bang (15 bang ERD + MaintenanceChecklistItem)
+   Tao CSDL ScentStationDB + 17 bang (15 bang ERD + MaintenanceChecklistItem + Campaign)
    Chay file nay DAU TIEN. Se xoa va tao lai database neu da ton tai.
    ===================================================================== */
 
@@ -116,6 +116,23 @@ CREATE TABLE MaintenanceRecord (
     completed_at        datetime2 NULL
 );
 
+-- Bang bo sung (Buoc 6): chuong trinh khuyen mai / dung thu mien phi / gia tam thoi cua tung thuong hieu
+CREATE TABLE Campaign (
+    CampaignID    int IDENTITY(1,1) CONSTRAINT PK_Campaign PRIMARY KEY,
+    BrandID       int NOT NULL CONSTRAINT FK_Campaign_Brand REFERENCES Brand(BrandID),
+    PerfumeID     int NULL     CONSTRAINT FK_Campaign_Perfume REFERENCES Perfume(PerfumeID),   -- NULL = ap dung moi nuoc hoa
+    LocationID    int NULL     CONSTRAINT FK_Campaign_Location REFERENCES Location(LocationID), -- NULL = ap dung moi dia diem
+    name          varchar(100) NOT NULL,
+    campaign_type varchar(20)  NOT NULL CONSTRAINT CK_Campaign_type CHECK (campaign_type IN ('PERCENT_OFF','TEMP_PRICE','FREE_TRIAL')),
+    value         decimal(10,2) NULL,   -- PERCENT_OFF: 1..100 (%) ; TEMP_PRICE: gia moi (VND) ; FREE_TRIAL: bo qua
+    starts_at     datetime2 NOT NULL,
+    ends_at       datetime2 NOT NULL,
+    is_active     bit NOT NULL CONSTRAINT DF_Campaign_active DEFAULT 1,
+    created_at    datetime2 NOT NULL CONSTRAINT DF_Campaign_created DEFAULT SYSDATETIME(),
+    CONSTRAINT CK_Campaign_period CHECK (ends_at > starts_at)
+);
+CREATE INDEX IX_Campaign_Brand ON Campaign(BrandID, is_active, starts_at, ends_at);
+
 CREATE TABLE Orders (
     OrderID           int IDENTITY(1,1) CONSTRAINT PK_Orders PRIMARY KEY,
     MachineSlotID     int NOT NULL CONSTRAINT FK_Orders_Slot    REFERENCES MachineSlot(MachineSlotID),
@@ -128,7 +145,8 @@ CREATE TABLE Orders (
     status            varchar(20) NOT NULL CONSTRAINT CK_Orders_status
         CHECK (status IN ('PENDING','DISPENSED','DISPENSE_FAILED','REFUNDED','REVIEW','EXPIRED','CANCELLED','FAILED')),
     expires_at        datetime2 NOT NULL,
-    created_at        datetime2 NOT NULL CONSTRAINT DF_Orders_created DEFAULT SYSDATETIME()
+    created_at        datetime2 NOT NULL CONSTRAINT DF_Orders_created DEFAULT SYSDATETIME(),
+    CampaignID        int NULL CONSTRAINT FK_Orders_Campaign REFERENCES Campaign(CampaignID)
 );
 
 CREATE TABLE Payment (
