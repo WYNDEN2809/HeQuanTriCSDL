@@ -1,0 +1,10 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Thêm thương hiệu - ScentStation{% endblock %}
+{% block page_title %}Thêm thương hiệu mới{% endblock %}
+{% block portal_content %}
+<div class="row"><div class="col-lg-6"><div class="card shadow-sm"><div class="card-body">
+  <p class="text-muted small">Tạo thương hiệu kèm tài khoản Brand Administrator đầu tiên. Dữ liệu của thương hiệu này được tách biệt với các thương hiệu khác.</p>
+  <form method="post">{% csrf_token %}{% include "portal/_form_fields.html" %}
+    <button class="btn btn-dark">Tạo</button> <a class="btn btn-outline-secondary" href="{% url 'tenant_list' %}">Hủy</a></form>
+</div></div></div></div>
+{% endblock %}

@@ -21,6 +21,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
 
+from catalog.campaign_services import effective_price
 from devices.models import Alert, Machine, MachineSlot
 from devices.services import can_accept_orders, raise_alert
 from inventory.models import InventoryLog
@@ -28,6 +29,9 @@ from reports.audit import log_action
 
 from .models import DispenseTransaction, Order, Payment
 from .security import sign_command, verify_webhook_signature
+
+
+FREE_TRIAL_METHOD = "FREE_TRIAL"   # Payment.method cua don dung thu mien phi (khong qua nha cung cap thanh toan)
 
 
 class OrderError(Exception):
@@ -56,19 +60,25 @@ def create_order(machine_id, slot_id):
 
     now = timezone.now()
     reference = f"PAY-{now:%Y%m%d}-{secrets.token_hex(4).upper()}"
+    # Khuyen mai dang hieu luc (neu co) duoc ap dung va CHOT vao don tai thoi diem tao don
+    final_price, campaign = effective_price(slot, now)
     # San pham va gia duoc CHOT tai thoi diem tao don
     order = Order.objects.create(
         machine_slot=slot,
         perfume=slot.perfume,
         unit_price=slot.price_per_spray,
         quantity=1,
-        amount=slot.price_per_spray,
+        amount=final_price,
+        campaign=campaign,
         payment_reference=reference,
         currency="VND",
         status=Order.Status.PENDING,
         expires_at=now + timedelta(seconds=settings.ORDER_TTL_SECONDS),
         created_at=now,
     )
+    if final_price <= 0:
+        # Don 0 dong (free-trial): backend tu xac nhan; van di qua cung duong sinh lenh xit duy nhat (1 don = 1 lenh)
+        _apply_payment(order, "FREE-" + reference, FREE_TRIAL_METHOD, "SUCCESS")
     return order
 
 

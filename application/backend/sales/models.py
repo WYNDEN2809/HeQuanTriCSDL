@@ -28,6 +28,8 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     expires_at = models.DateTimeField()
     created_at = models.DateTimeField(default=timezone.now)
+    campaign = models.ForeignKey("catalog.Campaign", models.PROTECT, db_column="CampaignID", related_name="orders",
+                                 blank=True, null=True)
 
     class Meta:
         managed = False

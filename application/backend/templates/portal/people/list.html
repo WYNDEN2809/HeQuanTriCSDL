@@ -1,0 +1,30 @@
+{% extends "portal/base_portal.html" %}
+{% load portal_extras %}
+{% block title %}Nhân viên - ScentStation{% endblock %}
+{% block page_title %}Nhân viên và vai trò{% if request.active_brand %} <small class="text-muted">- {{ request.active_brand.name }}</small>{% endif %}{% endblock %}
+{% block page_actions %}{% if request.active_brand_id %}<a class="btn btn-dark btn-sm" href="{% url 'people_create' %}">+ Tạo tài khoản</a>{% endif %}{% endblock %}
+{% block portal_content %}
+{% if not request.active_brand_id %}
+<div class="alert alert-warning">Hãy chọn một thương hiệu ở thanh trên cùng để quản lý nhân viên của thương hiệu đó.</div>
+{% else %}
+<form class="row g-2 mb-3" method="get"><div class="col-md-4"><input class="form-control" name="q" value="{{ q }}" placeholder="Tên đăng nhập hoặc email"></div>
+  <div class="col-md-2"><button class="btn btn-dark">Tìm</button></div></form>
+<div class="card shadow-sm"><div class="table-responsive"><table class="table table-sm align-middle mb-0">
+  <thead><tr><th>Tài khoản</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th style="width:48%">Thao tác</th></tr></thead>
+  <tbody>{% for m in members %}<tr>
+    <td>{{ m.user.username }}{% if m.user_id == me %} <span class="badge text-bg-info">Bạn</span>{% endif %}{% if m.other_brands %} <span class="badge text-bg-secondary" title="Thuộc thêm {{ m.other_brands }} thương hiệu khác">+{{ m.other_brands }} brand</span>{% endif %}</td>
+    <td>{{ m.user.email }}</td><td>{{ m.brand_role }}</td>
+    <td>{% if m.user.is_active %}<span class="badge text-bg-success">Hoạt động</span>{% else %}<span class="badge text-bg-secondary">Đã khóa</span>{% endif %}</td>
+    <td>
+      {% if m.user_id != me %}
+      <form method="post" action="{% url 'people_action' m.id %}" class="d-flex flex-wrap gap-1">{% csrf_token %}
+        <select name="brand_role" class="form-select form-select-sm" style="width:auto">{% for v, l in role_choices %}<option value="{{ v }}" {% if v == m.brand_role %}selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+        <button name="action" value="role" class="btn btn-outline-primary btn-sm">Đổi vai trò</button>
+        {% if m.user.is_active %}<button name="action" value="deactivate" class="btn btn-outline-warning btn-sm" onclick="return confirm('Khóa tài khoản và đăng xuất mọi phiên?')">Khóa</button>
+        {% else %}<button name="action" value="activate" class="btn btn-outline-success btn-sm">Mở khóa</button>{% endif %}
+        <button name="action" value="reset" class="btn btn-outline-secondary btn-sm" onclick="return confirm('Đặt lại mật khẩu (mật khẩu mới sẽ hiện một lần)?')">Đặt lại mật khẩu</button>
+        <button name="action" value="remove" class="btn btn-outline-danger btn-sm" onclick="return confirm('Gỡ khỏi thương hiệu này?')">Gỡ</button>
+      </form>{% else %}<span class="text-muted small">Không thể tự thao tác trên chính mình</span>{% endif %}
+    </td></tr>{% empty %}<tr><td colspan="5" class="text-muted">Chưa có nhân viên.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endif %}
+{% endblock %}

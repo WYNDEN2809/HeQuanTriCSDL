@@ -11,6 +11,7 @@
     <div><b>Địa điểm:</b> {{ order.machine_slot.machine.location.name }}</div>
     <div><b>Mùi hương:</b> {{ order.perfume.name }} × {{ order.quantity }}</div>
     <div><b>Đơn giá chốt:</b> {{ order.unit_price|money }} {{ order.currency }} &nbsp; <b>Thành tiền:</b> {{ order.amount|money }}</div>
+    {% if order.campaign_id %}<div><span class="badge text-bg-warning">Khuyến mãi: {{ order.campaign.name }}</span></div>{% endif %}
   </div></div></div>
   <div class="col-md-6"><div class="card shadow-sm h-100"><div class="card-body">
     <div class="fw-semibold mb-2">Xử lý đơn</div>

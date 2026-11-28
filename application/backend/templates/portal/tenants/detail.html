@@ -1,0 +1,24 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}{{ brand.name }} - ScentStation{% endblock %}
+{% block page_title %}{{ brand.name }} {% if brand.is_active %}<span class="badge text-bg-success">Hoạt động</span>{% else %}<span class="badge text-bg-secondary">Tạm ngưng</span>{% endif %}{% endblock %}
+{% block page_actions %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'tenant_list' %}">&laquo; Danh sách</a>{% endblock %}
+{% block portal_content %}
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card shadow-sm"><div class="card-header">Thông tin</div><div class="card-body">
+    <form method="post" action="{% url 'tenant_action' brand.id %}">{% csrf_token %}{% include "portal/_form_fields.html" %}
+      <button name="action" value="update" class="btn btn-dark btn-sm">Lưu</button></form></div></div>
+    <div class="card shadow-sm mt-3 {% if brand.is_active %}border-warning{% endif %}"><div class="card-body">
+      <p class="small text-muted mb-2">{{ n_members }} nhân viên. Tạm ngưng thương hiệu sẽ chặn đăng nhập vào thương hiệu này và đăng xuất ngay các tài khoản chỉ thuộc thương hiệu này.</p>
+      <form method="post" action="{% url 'tenant_action' brand.id %}">{% csrf_token %}
+        {% if brand.is_active %}<button name="action" value="suspend" class="btn btn-warning btn-sm" onclick="return confirm('Tạm ngưng thương hiệu này?')">Tạm ngưng thương hiệu</button>
+        {% else %}<button name="action" value="activate" class="btn btn-success btn-sm">Kích hoạt lại</button>{% endif %}</form></div></div></div>
+  <div class="col-lg-6"><div class="card shadow-sm"><div class="card-header">Brand Administrator</div>
+    <ul class="list-group list-group-flush">{% for a in admins %}<li class="list-group-item d-flex justify-content-between"><span>{{ a.user.username }} <span class="text-muted small">{{ a.user.email }}</span></span>
+      {% if a.user.is_active %}<span class="badge text-bg-success">Hoạt động</span>{% else %}<span class="badge text-bg-secondary">Khóa</span>{% endif %}</li>
+      {% empty %}<li class="list-group-item text-muted">Chưa có</li>{% endfor %}</ul>
+    <div class="card-body border-top"><div class="fw-semibold mb-2">Thêm Brand Administrator</div>
+      <form method="post" action="{% url 'tenant_action' brand.id %}">{% csrf_token %}
+        {% with form=admin_form %}{% include "portal/_form_fields.html" %}{% endwith %}
+        <button name="action" value="add_admin" class="btn btn-outline-dark btn-sm">Thêm</button></form></div></div></div>
+</div>
+{% endblock %}

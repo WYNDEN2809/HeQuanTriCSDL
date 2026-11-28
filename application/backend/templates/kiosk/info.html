@@ -1,0 +1,26 @@
+{% extends "kiosk/base.html" %}
+{% load humanize %}
+{% block title %}{{ perfume.name }} - ScentStation{% endblock %}
+{% block topright %}{{ brand.name }}{% endblock %}
+{% block content %}
+<div class="slot-card p-4 mx-auto" style="max-width:640px">
+  {% if brand.logo_url %}<img src="{{ brand.logo_url }}" alt="{{ brand.name }}" style="max-height:56px" class="mb-3">{% endif %}
+  <div class="text-secondary small">{{ brand.name }}</div>
+  <h2 class="gold">{{ perfume.name }}</h2>
+  <p>{{ perfume.description|default:"Chưa có mô tả." }}</p>
+
+  {% if campaign %}<div class="mb-1"><span class="badge text-bg-warning">{{ campaign.name }} · {{ campaign_text }}</span></div>{% endif %}
+  <div class="price mb-3">
+    {% if campaign %}<small class="text-secondary text-decoration-line-through fs-6">{{ slot.price_per_spray|floatformat:0|intcomma }} ₫</small><br>{% endif %}
+    {% if final_price == 0 %}Miễn phí{% else %}{{ final_price|floatformat:0|intcomma }} ₫{% endif %} <small class="fs-6 text-secondary">/ 1 lần xịt</small>
+  </div>
+
+  <div class="alert alert-secondary">
+    <b>Cách trải nghiệm:</b> chọn mùi hương trên màn hình kiosk, quét mã QR để thanh toán, rồi đặt giấy thử hoặc cổ tay vào khu vực xịt.
+    Mỗi lượt thanh toán chỉ xịt <b>một lần</b>.
+  </div>
+  <div class="small text-secondary mb-3">Máy: {{ machine.name }} · {{ machine.location.name }} ·
+    {% if ready %}đang sẵn sàng phục vụ{% else %}tạm thời không khả dụng{% endif %}</div>
+  {% if brand.description %}<div class="small text-secondary">{{ brand.description }}</div>{% endif %}
+</div>
+{% endblock %}

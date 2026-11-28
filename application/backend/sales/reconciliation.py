@@ -73,7 +73,7 @@ def reconcile(request, provider_rows, d_from, d_to):
         else:
             out["matched"].append(row)
     for txn, p in by_txn.items():
-        if txn not in seen and p.status in (Payment.Status.SUCCESS, Payment.Status.REFUNDED):
+        if txn not in seen and p.method != "FREE_TRIAL" and p.status in (Payment.Status.SUCCESS, Payment.Status.REFUNDED):
             out["missing_provider"].append({"txn": txn, "reference": p.order.payment_reference, "p_amount": None,
                                             "p_status": None, "i_amount": p.amount, "i_status": p.status})
     return out
