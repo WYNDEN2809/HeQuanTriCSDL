@@ -69,7 +69,7 @@ Khi dùng Docker, trong `.env` của backend đặt: `DB_HOST=localhost`, `DB_PO
 ```bash
 cd application/backend
 
-python -m venv venv
+python.exe -m venv venv
 venv\Scripts\activate            # Windows        (Mac/Linux: source venv/bin/activate)
 pip install -r requirements.txt
 
@@ -86,11 +86,14 @@ python manage.py reset_sample_passwords    # đặt mật khẩu cho 31 tài kho
 python manage.py check_db                  # phải báo "OK - 17 model khớp với bảng"
 ```
 > `migrate` chỉ tạo thêm bảng `django_*`, `auth_*`; **không** đụng vào 17 bảng nghiệp vụ (các model đều `managed = False`).
-> Nếu bạn đã chạy bản cũ và gặp lỗi "inconsistent migration history": chạy lại `01_CreateSchema.sql` → 02 → 03 → 04 rồi làm lại các lệnh trên từ đầu.
+> Nếu đã chạy bản cũ và gặp lỗi "inconsistent migration history": chạy lại `01_CreateSchema.sql` → 02 → 03 → 04 rồi làm lại các lệnh trên từ đầu.
 
 ## 7. Chạy dự án
 
 Cần **2 cửa sổ terminal** (đều đã kích hoạt venv, đang ở `application/backend`):
+cd ...\application\backend
+python.exe -m venv venv
+venv\Scripts\activate
 
 ```bash
 # Terminal 1 – web server
@@ -119,7 +122,7 @@ Nếu không kích hoạt được venv, thay `python` bằng `venv\Scripts\pyth
 
 Các thương hiệu: `lumiere`, `aurelia`, `saigon`, `noir`, `hoalan` (ví dụ `admin_noir`). Đăng nhập `admin_lumiere` rồi `admin_noir` để thấy mỗi người chỉ có dữ liệu của brand mình.
 
-## 8. Demo nhanh (5 phút)
+## 8. Demo nhanh
 
 1. Mở `/kiosk/` → chọn một máy → **Chọn mùi này** → **Xác nhận** → xuất hiện mã QR + đồng hồ đếm ngược.
 2. Bấm link **"mở trang thanh toán giả lập"** → **Thanh toán thành công**.
@@ -143,14 +146,6 @@ Chạy toàn bộ bộ tự kiểm thử trên **database thật** (mỗi bài �
 | `selftest_accounts` | nhân viên, vai trò, tenant, danh mục |
 | `selftest_campaigns` | khuyến mãi, dùng thử miễn phí, giá tạm thời, QR sản phẩm |
 
-Thử thêm các tình huống lỗi:
-```bash
-python manage.py send_webhook PAY-20261105-XXXXXXXX --times 3      # webhook trùng: chỉ 1 lệnh xịt
-python manage.py send_webhook PAY-... --bad-signature              # 401
-python manage.py run_device_simulator --fail-rate 0.5 --uncertain-rate 0.3   # nhiều đơn lỗi / REVIEW
-```
-(`PAY-...` là mã đơn hiển thị trên kiosk; tạo đơn nhưng **đừng** bấm thanh toán.)
-
 ## 10. Xử lý sự cố thường gặp
 
 | Triệu chứng | Cách xử lý |
@@ -165,7 +160,7 @@ python manage.py run_device_simulator --fail-rate 0.5 --uncertain-rate 0.3   # n
 | Không bấm "Kết thúc bảo trì" được | Máy còn phiếu bảo trì đang mở (dữ liệu mẫu có nhiều phiếu mở) – hoàn tất hoặc huỷ phiếu trước |
 | Python 3.13 báo lỗi khi cài Django 4.2 | Dùng Python 3.10–3.12 |
 
-## 11. Ghi chú & giới hạn (nên nêu khi bảo vệ)
+## 11. Ghi chú & giới hạn
 
 - Máy kiosk thật được **giả lập**; giao thức máy ↔ cloud là HTTP có chữ ký HMAC (token thiết bị, chữ ký lệnh, hạn lệnh, ack trước khi xịt). Tài liệu kỹ thuật mô tả cách ánh xạ sang MQTT khi có phần cứng.
 - Thanh toán dùng **sandbox** (webhook ký HMAC giống nhà cung cấp thật); chưa tích hợp cổng thanh toán thật.
